@@ -81,7 +81,7 @@ def checkCross(posFrom,posTo,pmove,board,piece):
 def checkPawn(posFrom,posTo,pmove,board):	# Needs en passant support
 	if  (abs(pmove[1]) > 2):
 		print "A pawn can't move more than 2 squares in the y-direction under any circumstances"
-	if (abs(pmove[1]) != 1) and (posFrom[0] != 1) and (posFrom[1] != 6):
+	if (abs(pmove[1]) != 1) and (posFrom[1] != 1) and (posFrom[1] != 6):
 		print "A pawn can't move more than 1 square in the y-direction"
 		return 1
 	if (pmove[0] != 0) and (abs(pmove[0]) != 1) and (abs(pmove[1]) != 1):
@@ -117,7 +117,7 @@ def printBoard(board):	# Prints board obviously, colored comes from library
 		print ""
 		i=not i
 
-def player(board, num):
+def player(board, num, history):
 	print "Player",num,"turn: \n\n"
 	while True:
 		while True:
@@ -137,7 +137,10 @@ def player(board, num):
 				print "Ilegal move!"
 			else: 
 				break
-	move(fromCoord,toCoord) 
+	history.append(fromCoord)
+	history.append(toCoord)
+	#print history
+	move(fromCoord,toCoord)
 board = [									# This is the original board
 ["Br","Bn","Bb","BQ","BK","Bb","Bn","Br"],	# W means player 1
 ["Bp","Bp","Bp","Bp","Bp","Bp","Bp","Bp"],	# I changed bishops and knights the right way round
@@ -149,10 +152,12 @@ board = [									# This is the original board
 ["Wr","Wn","Wb","WQ","WK","Wb","Wn","Wr"],
 ]
 
+history = []
+
 #MAIN LOOP
 quit = False
 while quit == False:
-	printBoard(board)		# Print
-	player(board, 1)		# Player 1
-	printBoard(board)		# Print
-	player(board, 2)		# Player 2
+	printBoard(board)				# Print
+	player(board, 1, history)		# Player 1
+	printBoard(board)				# Print
+	player(board, 2, history)		# Player 2
