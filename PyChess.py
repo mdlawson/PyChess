@@ -37,6 +37,8 @@ def checkLegal(posFrom,posTo, board, piece):
 		if (checkCross(posFrom,posTo,pmove,board,piece)==1) and (checkPlus(posFrom,posTo,pmove,board,piece)==1):
 			print "Invalid move for queen"
 			return 1
+	if "p" in piece:
+		return checkPawn(posFrom,posTo,pmove,board)
 
 def checkingLoop(axis,pmove,posFrom,piece):
 	for i in range(0,pmove[axis]-(pmove[axis]/abs(pmove[axis])),pmove[axis]/abs(pmove[axis])):
@@ -71,6 +73,17 @@ def checkCross(posFrom,posTo,pmove,board,piece):
 		if board[posFrom[1]+j][posFrom[0]+i] != "  ":
 			print "there is a piece in the way!"
 			return 1
+
+def checkPawn(posFrom,posTo,pmove,board):	# Needs en passant support
+	if (abs(pmove[1]) != 1) and (posFrom[0] != 1) and (posFrom[1] != 6) and (abs(pmove[1]) > 2):
+		print "A pawn can't move more than 1 square in the y-direction"
+		return 1
+	if (pmove[0] != 0) and (abs(pmove[0]) != 1) and (abs(pmove[1]) != 1):
+		print "Can't move like that"
+		return 1
+	if (abs(pmove[0] == 1)) and (abs(pmove[1]) == 1) and (board[posTo[1]][posTo[0]] == "  "):
+		print "No piece to be taken"
+		return 1
 
 def printBoard(board):	# Prints board obviously, colored comes from library
 	#os.system("clear")
