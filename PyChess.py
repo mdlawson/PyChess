@@ -93,7 +93,7 @@ def checkPawn(posFrom,posTo,pmove,board,piece):	# Needs en passant support
 	if (pmove[0] != 0) and (abs(pmove[0]) != 1) and (abs(pmove[1]) != 1):
 		print "Can't move like that"
 		return 1
-	if (abs(pmove[0] == 1)) and (abs(pmove[1]) == 1) and (board[posTo[1]][posTo[0]] == "  "):
+	if (abs(pmove[0]) == 1) and (abs(pmove[1]) == 1) and (board[posTo[1]][posTo[0]] == "  "):
 		print "No piece to be taken"
 		return 1
 
@@ -146,7 +146,7 @@ def player(board, num, history):
 	
 	Coord = [fromCoord[0], fromCoord[1], toCoord[0], toCoord[1]]
 	history.append(Coord)
-	print history
+	#print history
 	move(fromCoord,toCoord)
 board = [									# This is the original board
 ["Br","Bn","Bb","BQ","BK","Bb","Bn","Br"],	# W means player 1
