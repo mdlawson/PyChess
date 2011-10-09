@@ -93,13 +93,13 @@ def checkPawn(posFrom,posTo,pmove,board):	# Needs en passant support
 
 def checkKnight(posFrom,posTo,pmove,board): # Needs more, that difficult thing, although not important
 	nmove = [abs(pmove[0]),abs(pmove[1])]
-	if (nmove != [1,2]) and (nmove != [2,1])
+	if (nmove != [1,2]) and (nmove != [2,1]):
 		print "Invalid move for Knight"
 		return 1
 
 def checkKing(pmove):	# Needs checking to whether King is moving into check, and castling needed as well
 	kmove = [abs(pmove[0]),abs(pmove[1])]
-	if (nmove != [0,1]) and (nmove != [1,0]) and (nmove != [1,1]):
+	if (kmove != [0,1]) and (kmove != [1,0]) and (kmove != [1,1]):
 		print "King can only move one space at a time"
 		return 1
 
