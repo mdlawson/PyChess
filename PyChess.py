@@ -38,7 +38,7 @@ def checkLegal(posFrom,posTo, board, piece):
 			print "Invalid move for queen"
 			return 1
 	if "p" in piece:
-		return checkPawn(posFrom,posTo,pmove,board)
+		return checkPawn(posFrom,posTo,pmove,board,piece)
 	if "n" in piece:
 		return checkKnight(posFrom,posTo,pmove,board)
 	if "K" in piece:
@@ -78,11 +78,17 @@ def checkCross(posFrom,posTo,pmove,board,piece):
 			print "there is a piece in the way!"
 			return 1
 
-def checkPawn(posFrom,posTo,pmove,board):	# Needs en passant support
+def checkPawn(posFrom,posTo,pmove,board,piece):	# Needs en passant support
+	if ("W" in piece) and (pmove[1] > 0):
+		print "Pawns can't move backwards"
+		return 1
+	if ("B" in piece) and (pmove[1] < 0):
+		print "Pawns can't move backwards"
+		return 1
 	if  (abs(pmove[1]) > 2):
 		print "A pawn can't move more than 2 squares in the y-direction under any circumstances"
 	if (abs(pmove[1]) != 1) and (posFrom[1] != 1) and (posFrom[1] != 6):
-		print "A pawn can't move more than 1 square in the y-direction"
+		print "A pawn can only move 1 square in the y-direction"
 		return 1
 	if (pmove[0] != 0) and (abs(pmove[0]) != 1) and (abs(pmove[1]) != 1):
 		print "Can't move like that"
@@ -91,7 +97,7 @@ def checkPawn(posFrom,posTo,pmove,board):	# Needs en passant support
 		print "No piece to be taken"
 		return 1
 
-def checkKnight(posFrom,posTo,pmove,board): # Needs more, that difficult thing, although not important
+def checkKnight(posFrom,posTo,pmove,board):
 	nmove = [abs(pmove[0]),abs(pmove[1])]
 	if (nmove != [1,2]) and (nmove != [2,1]):
 		print "Invalid move for Knight"
@@ -137,9 +143,10 @@ def player(board, num, history):
 				print "Ilegal move!"
 			else: 
 				break
-	history.append(fromCoord)
-	history.append(toCoord)
-	#print history
+	
+	Coord = [fromCoord[0], fromCoord[1], toCoord[0], toCoord[1]]
+	history.append(Coord)
+	print history
 	move(fromCoord,toCoord)
 board = [									# This is the original board
 ["Br","Bn","Bb","BQ","BK","Bb","Bn","Br"],	# W means player 1
@@ -157,7 +164,7 @@ history = []
 #MAIN LOOP
 quit = False
 while quit == False:
-	printBoard(board)				# Print
-	player(board, 1, history)		# Player 1
-	printBoard(board)				# Print
-	player(board, 2, history)		# Player 2
+	printBoard(board)
+	player(board, 1, history)
+	printBoard(board)
+	player(board, 2, history)
