@@ -27,25 +27,31 @@ def move(posFrom, posTo):
 
 def checkLegal(posFrom,posTo, board, piece):
 	pmove = [0,0]
-	pmove[0] = abs(posTo[0]-posFrom[0])
-	pmove[1] = abs(posTo[1]-posFrom[1])
+	pmove[0] = posTo[0]-posFrom[0]
+	pmove[1] = posTo[1]-posFrom[1]
 	if "r" in piece:
 		return checkPlus(posFrom,posTo,pmove,board)
 
-def checkingLoop(dist, yfunc, xfunc, posy, posx):
-	for i in range(dist):
-		if board[posy+eval(yfunc)][posx+eval(xfunc)] != "  ":
-			print "there is a piece in the way!"
-			return 1
+def checkingLoop(axis,pmove,posFrom):
+	for i in range(0,pmove[axis]-(pmove[axis]/abs(pmove[axis])),pmove[axis]/abs(pmove[axis])):
+		i = i+(pmove[axis]/abs(pmove[axis]))
+		if axis==0:
+			if board[posFrom[1-axis]][posFrom[axis]+i] != "  ":
+				print "there is a piece in the way!"
+				return 1
+		else:
+			if board[posFrom[axis]+i][posFrom[1-axis]] != "  ":
+				print "there is a piece in the way!"
+				return 1
 	
 def checkPlus(posFrom,posTo,pmove,board):
 	if (pmove[0] != 0) and (pmove[1] != 0):
 		print "movement is not in a straight line"
 		return 1
 	if (pmove[1] == 0): 
-		return checkingLoop(pmove[0],"0","+i+1",posFrom[1],posFrom[0])
+		return checkingLoop(0,pmove,posFrom)
 	else:
-		return checkingLoop(pmove[1],"+i+1","0",posFrom[0],posFrom[1])
+		return checkingLoop(1,pmove,posFrom)
 
 def checkCross(posFrom,posTo,pmove,board):
 	if abs(pmove[0])!=abs(pmove[1]):
@@ -70,7 +76,7 @@ def printBoard(board):	# Prints board obviously, colored comes from library
 		print ""
 		i=not i
 
-def player(board, num):	# I made this bloody difficult but there are no bugs whatsoever so I'm happy
+def player(board, num):
 	print "Player",num,"turn: \n\n"
 	while True:
 		while True:
@@ -92,14 +98,14 @@ def player(board, num):	# I made this bloody difficult but there are no bugs wha
 				break
 	move(fromCoord,toCoord) 
 board = [									# This is the original board
-["Wr","Wn","Wb","WK","WQ","Wb","Wn","Wr"],	# W means player 1
-["Wp","Wp","Wp","Wp","Wp","Wp","Wp","Wp"],	# I changed bishops and knights the right way round
+["Br","Bn","Bb","BQ","BK","Bb","Bn","Br"],	# W means player 1
+["Bp","Bp","Bp","Bp","Bp","Bp","Bp","Bp"],	# I changed bishops and knights the right way round
 ["  ","  ","  ","  ","  ","  ","  ","  "],	# n = Knights, as in normal chess notation, "N"
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
-["Bp","Bp","Bp","Bp","Bp","Bp","Bp","Bp"],
-["Br","Bn","Bb","BK","BQ","Bb","Bn","Br"],
+["Wp","Wp","Wp","Wp","Wp","Wp","Wp","Wp"],
+["Wr","Wn","Wb","WQ","WK","Wb","Wn","Wr"],
 ]
 
 #MAIN LOOP
