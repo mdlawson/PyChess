@@ -31,8 +31,14 @@ def checkLegal(posFrom,posTo, board, piece):
 	pmove[1] = posTo[1]-posFrom[1]
 	if "r" in piece:
 		return checkPlus(posFrom,posTo,pmove,board)
+	if "b" in piece:
+		return checkCross(posFrom,posTo,pmove,board,piece)
+	if "Q" in piece:
+		if (checkCross(posFrom,posTo,pmove,board,piece)==1) and (checkPlus(posFrom,posTo,pmove,board,piece)==1):
+			print "Invalid move for queen"
+			return 1
 
-def checkingLoop(axis,pmove,posFrom):
+def checkingLoop(axis,pmove,posFrom,piece):
 	for i in range(0,pmove[axis]-(pmove[axis]/abs(pmove[axis])),pmove[axis]/abs(pmove[axis])):
 		i = i+(pmove[axis]/abs(pmove[axis]))
 		if axis==0:
@@ -46,19 +52,23 @@ def checkingLoop(axis,pmove,posFrom):
 	
 def checkPlus(posFrom,posTo,pmove,board):
 	if (pmove[0] != 0) and (pmove[1] != 0):
-		print "movement is not in a straight line"
+		if "Q" not in piece:
+			print "movement is not in a straight line"
 		return 1
 	if (pmove[1] == 0): 
 		return checkingLoop(0,pmove,posFrom)
 	else:
 		return checkingLoop(1,pmove,posFrom)
 
-def checkCross(posFrom,posTo,pmove,board):
+def checkCross(posFrom,posTo,pmove,board,piece):
 	if abs(pmove[0])!=abs(pmove[1]):
-		print "movement is not in a diagonal line"
+		if "Q" not in piece:	
+			print "movement is not in a diagonal line"
 		return 1
-	for i in range(pmove[0]):
-		if board[posFrom[0]+i+1][posFrom[1]+i+1] != "  ":
+	for i in range(0,pmove[0]-pmove[0]/abs(pmove[0]),pmove[0]/abs(pmove[0])):
+		i = i+(pmove[0]/abs(pmove[0]))
+		j = abs(i)*(pmove[1]/abs(pmove[1]))
+		if board[posFrom[1]+j][posFrom[0]+i] != "  ":
 			print "there is a piece in the way!"
 			return 1
 
