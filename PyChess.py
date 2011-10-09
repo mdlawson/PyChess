@@ -41,6 +41,8 @@ def checkLegal(posFrom,posTo, board, piece):
 		return checkPawn(posFrom,posTo,pmove,board)
 	if "n" in piece:
 		return checkKnight(posFrom,posTo,pmove,board)
+	if "K" in piece:
+		return checkKing(pmove)
 
 def checkingLoop(axis,pmove,posFrom,piece):
 	for i in range(0,pmove[axis]-(pmove[axis]/abs(pmove[axis])),pmove[axis]/abs(pmove[axis])):
@@ -91,9 +93,14 @@ def checkPawn(posFrom,posTo,pmove,board):	# Needs en passant support
 
 def checkKnight(posFrom,posTo,pmove,board): # Needs more, that difficult thing, although not important
 	nmove = [abs(pmove[0]),abs(pmove[1])]
-	print nmove
 	if (nmove != [1,2]) and (nmove != [2,1])
 		print "Invalid move for Knight"
+		return 1
+
+def checkKing(pmove):	# Needs checking to whether King is moving into check, and castling needed as well
+	kmove = [abs(pmove[0]),abs(pmove[1])]
+	if (nmove != [0,1]) and (nmove != [1,0]) and (nmove != [1,1]):
+		print "King can only move one space at a time"
 		return 1
 
 def printBoard(board):	# Prints board obviously, colored comes from library
