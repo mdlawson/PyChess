@@ -39,6 +39,8 @@ def checkLegal(posFrom,posTo, board, piece):
 			return 1
 	if "p" in piece:
 		return checkPawn(posFrom,posTo,pmove,board)
+	if "n" in piece:
+		return checkKnight(posFrom,posTo,pmove,board)
 
 def checkingLoop(axis,pmove,posFrom,piece):
 	for i in range(0,pmove[axis]-(pmove[axis]/abs(pmove[axis])),pmove[axis]/abs(pmove[axis])):
@@ -75,7 +77,9 @@ def checkCross(posFrom,posTo,pmove,board,piece):
 			return 1
 
 def checkPawn(posFrom,posTo,pmove,board):	# Needs en passant support
-	if (abs(pmove[1]) != 1) and (posFrom[0] != 1) and (posFrom[1] != 6) and (abs(pmove[1]) > 2):
+	if  (abs(pmove[1]) > 2):
+		print "A pawn can't move more than 2 squares in the y-direction under any circumstances"
+	if (abs(pmove[1]) != 1) and (posFrom[0] != 1) and (posFrom[1] != 6):
 		print "A pawn can't move more than 1 square in the y-direction"
 		return 1
 	if (pmove[0] != 0) and (abs(pmove[0]) != 1) and (abs(pmove[1]) != 1):
@@ -83,6 +87,13 @@ def checkPawn(posFrom,posTo,pmove,board):	# Needs en passant support
 		return 1
 	if (abs(pmove[0] == 1)) and (abs(pmove[1]) == 1) and (board[posTo[1]][posTo[0]] == "  "):
 		print "No piece to be taken"
+		return 1
+
+def checkKnight(posFrom,posTo,pmove,board): # Needs more, that difficult thing, although not important
+	nmove = [abs(pmove[0]),abs(pmove[1])]
+	print nmove
+	if (nmove != [1,2]) and (nmove != [2,1])
+		print "Invalid move for Knight"
 		return 1
 
 def printBoard(board):	# Prints board obviously, colored comes from library
