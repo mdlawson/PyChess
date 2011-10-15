@@ -3,9 +3,58 @@ import os
 from string import replace
 from termcolor import colored
 
-def letterToNum(str):
-	out = replace(str, "W","1")
-	return replace(out, "B","2")
+def containsAny(str, set):
+	return 1 in [c in str for c in set]
+
+def decodeNotation(player,str,board):
+	if (len(str) == 2):
+		assert containsAny(str[:1],"abcdefgh")
+		assert containsAny(str[1:],"12345678")
+		piece = "p"
+		mtype = "pawnsimple"
+	if (len(str) == 3) and (containsAny(str[:1],"KQRBNp0") == 0):
+		if str == "0-0":
+			checkCastling() # implement later
+		piece = str[:1]
+		mtype = "3"
+#	if (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 0) and (containsAny(str[1],"12345678") == 0) and (containsAny(str[2],"abcdefgh") == 0) and (containsAny(str[3],"12345678") == 0):
+#		mtype = "coord"
+#	if (len(str) == 4) and (containsAny(str[1],"x") == 0):
+#		mtype = "take"
+#	if (len(str) == 4) and (containsAny(str[1:],"+") == 0):
+#		mtype = "check"
+#	if (len(str) == 5):
+#		
+	
+	else:
+		return 1
+#	print checkInitial(player,piece,board,mtype,str)
+	return checkInitial(player,piece,board,mtype,str)
+
+def checkInitial(player,piece,board,mtype,str):
+	if mtype == "pawnsimple":
+		coord = chessToCoord(str)
+		posFrom = [coord[0],coord[1]+1]
+		return posFrom
+	if mtype == "3":
+		coord = chessToCoord[str[1:]]
+		if piece == "K":
+			print "King"
+			posFrom = checkWhere(player,piece)
+
+
+def checkWhere(player, piece):
+	for i in board:
+		for j in i:
+			if j == str(player)+piece:
+				posx = i.index(str(player)+piece)
+				posy = board.index(i)
+	return [posx, posy]
+
+#def letterToNum(str):
+#	out = replace(str, "W","1")
+#	return replace(out, "B","2")
+
 def chessToCoord(str):
 	coord = [0,0]
 	char = str[:1]
@@ -13,6 +62,7 @@ def chessToCoord(str):
 	num = str[1:]
 	coord[1] = 8-int(num)
 	return coord
+
 def edgeDetect(x, y):
 	if (x < 8) and (y < 8) and (x > -1) and (y > -1): # Included idiot detection
 		return 0
@@ -79,12 +129,14 @@ def checkCross(posFrom,posTo,pmove,board,piece):
 			return 1
 
 def checkPawn(posFrom,posTo,pmove,board,piece):	# Needs en passant support
-	if ("W" in piece) and (pmove[1] > 0):
-		print "Pawns can't move backwards"
-		return 1
-	if ("B" in piece) and (pmove[1] < 0):
-		print "Pawns can't move backwards"
-		return 1
+	if ("1" in piece):
+		if (pmove[1] > 0):
+			print "Pawns can't move backwards"
+			return 1
+	if ("2" in piece): 
+		if (pmove[1] < 0):
+			print "Pawns can't move backwards"
+			return 1
 	if  (abs(pmove[1]) > 2):
 		print "A pawn can't move more than 2 squares in the y-direction under any circumstances"
 	if (abs(pmove[1]) != 1) and (posFrom[1] != 1) and (posFrom[1] != 6):
@@ -126,37 +178,46 @@ def printBoard(board):	# Prints board obviously, colored comes from library
 def player(board, num, history):
 	print "Player",num,"turn: \n\n"
 	while True:
-		while True:
-			fromCoord = chessToCoord(raw_input("Enter the piece you want to move: "))
-			if edgeDetect(fromCoord[0], fromCoord[1]) == 0:
-				piece = board[fromCoord[1]][fromCoord[0]]
-				print "Piece selected:",piece
-				if str(num) in letterToNum(piece):
-					break
-				else: 
-					print "Invalid piece!"
-		toCoord = chessToCoord(raw_input("Enter the destination to move to: "))
-		if edgeDetect(toCoord[0],toCoord[1]) == 0:
-			if str(num) in letterToNum(board[toCoord[1]][toCoord[0]]):
-				print "You cant take your own pieces!"
-			elif checkLegal(fromCoord,toCoord, board, piece) == 1:
-				print "Ilegal move!"
-			else: 
-				break
+		naturalInput = raw_input("Your move (standard chess notation):")
+		fromCoord = decodeNotation(num,naturalInput,board)
+		if fromCoord == 1:
+			print "Invalid input"
+		else :
+			toCoord = [0,0]
+			toCoord = chessToCoord(naturalInput)
+
+			break
+#		while True:
+#			fromCoord = chessToCoord(raw_input("Enter the piece you want to move: "))
+#			if edgeDetect(fromCoord[0], fromCoord[1]) == 0:
+#				piece = board[fromCoord[1]][fromCoord[0]]
+#				print "Piece selected:",piece
+#				if str(num) in letterToNum(piece):
+#					break
+#				else: 
+#					print "Invalid piece!"
+#		toCoord = chessToCoord(raw_input("Enter the destination to move to: "))
+#		if edgeDetect(toCoord[0],toCoord[1]) == 0:
+#			if str(num) in letterToNum(board[toCoord[1]][toCoord[0]]):
+#				print "You cant take your own pieces!"
+#			elif checkLegal(fromCoord,toCoord, board, piece) == 1:
+#				print "Ilegal move!"
+#			else: 
+#				break
 	
 	Coord = [fromCoord[0], fromCoord[1], toCoord[0], toCoord[1]]
 	history.append(Coord)
 	#print history
 	move(fromCoord,toCoord)
 board = [									# This is the original board
-["Br","Bn","Bb","BQ","BK","Bb","Bn","Br"],	# W means player 1
-["Bp","Bp","Bp","Bp","Bp","Bp","Bp","Bp"],	# I changed bishops and knights the right way round
+["2R","2N","2B","2Q","2K","2B","2N","2R"],
+["2p","2p","2p","2p","2p","2p","2p","2p"],	# I changed bishops and knights the right way round
 ["  ","  ","  ","  ","  ","  ","  ","  "],	# n = Knights, as in normal chess notation, "N"
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
-["Wp","Wp","Wp","Wp","Wp","Wp","Wp","Wp"],
-["Wr","Wn","Wb","WQ","WK","Wb","Wn","Wr"],
+["1p","1p","1p","1p","1p","1p","1p","1p"],
+["1R","1N","1B","1Q","1K","1B","1N","1R"],
 ]
 
 history = []
