@@ -12,6 +12,7 @@ def decodeNotation(player,str,board):
 		assert containsAny(str[1:],"12345678")
 		piece = "p"
 		mtype = "pawnsimple"
+		return checkInitial(player,piece,board,mtype,str)
 	if (len(str) == 3) and (containsAny(str[:1],"KQRBNp0") == 0):
 		if str == "0-0":
 			checkCastling() # implement later
@@ -29,15 +30,19 @@ def decodeNotation(player,str,board):
 	else:
 		return 1
 #	print checkInitial(player,piece,board,mtype,str)
-	return checkInitial(player,piece,board,mtype,str)
 
 def checkInitial(player,piece,board,mtype,str):
+	print player
 	if mtype == "pawnsimple":
-		coord = chessToCoord(str)
-		posFrom = [coord[0],coord[1]+1]
-		return posFrom
+		toCoord = chessToCoord(str)
+		print board[toCoord[1]][toCoord[0]]
+		if player in board[toCoord[1]][toCoord[0]]:
+				print "You cant take your own pieces!"
+		else:
+			posFrom = [toCoord[0],toCoord[1]+1]
+			return posFrom
 	if mtype == "3":
-		coord = chessToCoord[str[1:]]
+		toCoord = chessToCoord[str[1:]]
 		if piece == "K":
 			print "King"
 			posFrom = checkWhere(player,piece)
@@ -180,6 +185,7 @@ def player(board, num, history):
 	while True:
 		naturalInput = raw_input("Your move (standard chess notation):")
 		fromCoord = decodeNotation(num,naturalInput,board)
+		print fromCoord
 		if fromCoord == 1:
 			print "Invalid input"
 		else :
@@ -226,6 +232,6 @@ history = []
 quit = False
 while quit == False:
 	printBoard(board)
-	player(board, 1, history)
+	player(board, "1", history)
 	printBoard(board)
-	player(board, 2, history)
+	player(board, "2", history)
