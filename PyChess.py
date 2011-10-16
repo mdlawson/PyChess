@@ -7,19 +7,27 @@ def containsAny(str, set):
 	return 1 in [c in str for c in set]
 
 def decodeNotation(player,str,board):
-	if (len(str) == 2):
-		assert containsAny(str[:1],"abcdefgh")
-		assert containsAny(str[1:],"12345678")
-		piece = "p"
-		mtype = "pawnsimple"
-		return checkInitial(player,piece,board,mtype,str)
-	if (len(str) == 3) and (containsAny(str[:1],"KQRBNp0") == 0):
-		if str == "0-0":
-			checkCastling() # implement later
-		piece = str[:1]
-		mtype = "3"
-#	if (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 0) and (containsAny(str[1],"12345678") == 0) and (containsAny(str[2],"abcdefgh") == 0) and (containsAny(str[3],"12345678") == 0):
-#		mtype = "coord"
+#	if (len(str) == 2):
+#		assert containsAny(str[:1],"abcdefgh")
+#		assert containsAny(str[1:],"12345678")
+#		piece = "p"
+#		mtype = "pawnsimple"
+#		return checkInitial(player,piece,board,mtype,str)
+#
+#	if (len(str) == 3) and (containsAny(str[:1],"KQRBNp0") == 1):
+#		if str == "0-0":
+#			checkCastling() # implement later
+#		piece = str[:1]
+#		mtype = "3"
+	if (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
+		mtype = "coord"
+		toCoord = chessToCoord(str[2:])
+		if player in board[toCoord[1]][toCoord[0]]:
+				print "You cant take your own pieces!"
+				return 1
+		print checkInitial(player,toCoord,board,mtype,str)
+		return toCoord,checkInitial(player,toCoord,board,mtype,str)
+
 #	if (len(str) == 4) and (containsAny(str[1],"x") == 0):
 #		mtype = "take"
 #	if (len(str) == 4) and (containsAny(str[1:],"+") == 0):
@@ -29,24 +37,28 @@ def decodeNotation(player,str,board):
 	
 	else:
 		return 1
-#	print checkInitial(player,piece,board,mtype,str)
 
-def checkInitial(player,piece,board,mtype,str):
-	print player
-	if mtype == "pawnsimple":
-		toCoord = chessToCoord(str)
-		print board[toCoord[1]][toCoord[0]]
+def checkInitial(player,toCoord,board,mtype,str):
+#	if mtype == "pawnsimple":
+#		toCoord = chessToCoord(str)
+#		print board[toCoord[1]][toCoord[0]]
+#		if player in board[toCoord[1]][toCoord[0]]:
+#				print "You cant take your own pieces!"
+#		else:
+#			posFrom = [toCoord[0],toCoord[1]+1]
+#			return posFrom
+#	if mtype == "3":
+#		toCoord = chessToCoord[str[1:]]
+#		if piece == "K":
+#			print "King"
+#			posFrom = checkWhere(player,piece)
+	if mtype == "coord":
 		if player in board[toCoord[1]][toCoord[0]]:
 				print "You cant take your own pieces!"
 		else:
-			posFrom = [toCoord[0],toCoord[1]+1]
+			fromCoord = chessToCoord(str[:2])
+			posFrom = [fromCoord[0],fromCoord[1]]		
 			return posFrom
-	if mtype == "3":
-		toCoord = chessToCoord[str[1:]]
-		if piece == "K":
-			print "King"
-			posFrom = checkWhere(player,piece)
-
 
 def checkWhere(player, piece):
 	for i in board:
@@ -184,15 +196,16 @@ def player(board, num, history):
 	print "Player",num,"turn: \n\n"
 	while True:
 		naturalInput = raw_input("Your move (standard chess notation):")
-		fromCoord = decodeNotation(num,naturalInput,board)
-		print fromCoord
-		if fromCoord == 1:
+		if decodeNotation(num,naturalInput,board) == 1:
 			print "Invalid input"
-		else :
-			toCoord = [0,0]
-			toCoord = chessToCoord(naturalInput)
-
+		else:
+			toCoord,fromCoord = decodeNotation(num,naturalInput,board)
 			break
+#		else :
+#			toCoord = [0,0]
+#			toCoord = chessToCoord(naturalInput[2:])
+#
+#			break
 #		while True:
 #			fromCoord = chessToCoord(raw_input("Enter the piece you want to move: "))
 #			if edgeDetect(fromCoord[0], fromCoord[1]) == 0:
@@ -212,6 +225,7 @@ def player(board, num, history):
 #				break
 	
 	Coord = [fromCoord[0], fromCoord[1], toCoord[0], toCoord[1]]
+	print Coord
 	history.append(Coord)
 	#print history
 	move(fromCoord,toCoord)
