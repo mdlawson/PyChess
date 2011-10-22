@@ -9,7 +9,7 @@ def containsAny(str, set):
 def decodeNotation(player,str,board):
 	if (len(str) == 2) and (containsAny(str[:1],"abcdefgh")) and (containsAny(str[1:],"12345678")):
 		piece = "p"
-		mtype = "3"
+		mtype = "normal"
 		toCoord = chessToCoord(str)
 
 	elif (len(str) == 3) and (containsAny(str[0],"KQRBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"12345678") == 1):
@@ -124,7 +124,7 @@ def checkLegal(posFrom,posTo, board, piece):
 	if "K" in piece:
 		return checkKing(pmove)
 
-def checkingLoop(axis,pmove,posFrom,piece):
+def checkingLoop(axis,pmove,posFrom):
 	for i in range(0,pmove[axis]-(pmove[axis]/abs(pmove[axis])),pmove[axis]/abs(pmove[axis])):
 		i = i+(pmove[axis]/abs(pmove[axis]))
 		if axis==0:
