@@ -51,13 +51,18 @@ def checkInitial(player,piece,toCoord,board,mtype,str):
 #			posFrom = [toCoord[0],toCoord[1]+1]
 #			return posFrom
 	if mtype == "3":
-		count,coords = checkWhere(player,piece)
-#		print count
-#		print coords
+		coords = checkWhere(player,piece)
+		count = 0
 		for fromCoord in coords:
 			print "This is fromcoord",fromCoord
 			if checkLegal(fromCoord,toCoord,board,piece) != 1:
-				print fromCoord
+				count = count + 1
+				posFrom = fromCoord
+				if count > 1:
+					print "There are multiple pieces which can do that move"
+					return 1
+		if count == 1:
+			return posFrom
 		return 1
 	if mtype == "coord":
 		fromCoord = chessToCoord(str[:2])
@@ -88,7 +93,7 @@ def checkWhere(player, piece):
 			if j == str(player)+piece:
 				count = count + 1
 				coords.append([coordx-((coordy)*8),coordy])
-	return count,coords
+	return coords
 
 #def letterToNum(str):
 #	out = replace(str, "W","1")
