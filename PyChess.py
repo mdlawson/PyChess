@@ -14,19 +14,22 @@ def decodeNotation(player,str,board):
 #		mtype = "pawnsimple"
 #		return checkInitial(player,piece,board,mtype,str)
 #
-#	if (len(str) == 3) and (containsAny(str[:1],"KQRBNp0") == 1):
-#		if str == "0-0":
-#			checkCastling() # implement later
-#		piece = str[:1]
-#		mtype = "3"
+	if (len(str) == 3) and (containsAny(str[0],"KQRBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"12345678") == 1):
+		piece = str[0]
+		mtype = "3"
+		toCoord = chessToCoord(str[1:])
+		if takingOwnPiece(player,board,toCoord) != 1 and checkInitial(player,piece,toCoord,board,mtype,str) != 1:
+			return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
+		else:
+			return 1
+
 	if (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
 		mtype = "coord"
+		piece = "unknown"
 		toCoord = chessToCoord(str[2:])
-		if player in board[toCoord[1]][toCoord[0]]:
-				print "You cant take your own pieces!"
-				return 1
-		print checkInitial(player,toCoord,board,mtype,str)
-		return toCoord,checkInitial(player,toCoord,board,mtype,str)
+		if takingOwnPiece(player,board,toCoord) == 1:
+			return 1
+		return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
 
 #	if (len(str) == 4) and (containsAny(str[1],"x") == 0):
 #		mtype = "take"
@@ -34,11 +37,11 @@ def decodeNotation(player,str,board):
 #		mtype = "check"
 #	if (len(str) == 5):
 #		
-	
 	else:
 		return 1
 
-def checkInitial(player,toCoord,board,mtype,str):
+def checkInitial(player,piece,toCoord,board,mtype,str):
+
 #	if mtype == "pawnsimple":
 #		toCoord = chessToCoord(str)
 #		print board[toCoord[1]][toCoord[0]]
@@ -47,26 +50,45 @@ def checkInitial(player,toCoord,board,mtype,str):
 #		else:
 #			posFrom = [toCoord[0],toCoord[1]+1]
 #			return posFrom
-#	if mtype == "3":
-#		toCoord = chessToCoord[str[1:]]
-#		if piece == "K":
-#			print "King"
-#			posFrom = checkWhere(player,piece)
+	if mtype == "3":
+		count,coords = checkWhere(player,piece)
+#		print count
+#		print coords
+		for fromCoord in coords:
+			print "This is fromcoord",fromCoord
+			if checkLegal(fromCoord,toCoord,board,piece) != 1:
+				print fromCoord
+		return 1
 	if mtype == "coord":
-		if player in board[toCoord[1]][toCoord[0]]:
-				print "You cant take your own pieces!"
+		fromCoord = chessToCoord(str[:2])
+		print fromCoord
+		if player not in board[fromCoord[1]][fromCoord[0]]:
+			print "Select your own piece"
+			return 1
+		piece = board[fromCoord[1]][fromCoord[0]][1]
+		if checkLegal(fromCoord,toCoord,board,piece) == 1:
+			return 1
 		else:
-			fromCoord = chessToCoord(str[:2])
-			posFrom = [fromCoord[0],fromCoord[1]]		
-			return posFrom
+			return fromCoord
+
+def takingOwnPiece(player,board,toCoord):
+	if player in board[toCoord[1]][toCoord[0]]:
+		print "You can't take your own pieces!"
+		return 1
 
 def checkWhere(player, piece):
+	count = 0
+	coords = []
+	coordx = -1
+	coordy = -1
 	for i in board:
+		coordy = coordy + 1
 		for j in i:
+			coordx = coordx + 1
 			if j == str(player)+piece:
-				posx = i.index(str(player)+piece)
-				posy = board.index(i)
-	return [posx, posy]
+				count = count + 1
+				coords.append([coordx-((coordy)*8),coordy])
+	return count,coords
 
 #def letterToNum(str):
 #	out = replace(str, "W","1")
@@ -164,6 +186,8 @@ def checkPawn(posFrom,posTo,pmove,board,piece):	# Needs en passant support
 		return 1
 	if (abs(pmove[0]) == 1) and (abs(pmove[1]) == 1) and (board[posTo[1]][posTo[0]] == "  "):
 		print "No piece to be taken"
+		return 1
+	if (abs(pmove[1]) == 2) and (pmove[0] != 0):
 		return 1
 
 def checkKnight(posFrom,posTo,pmove,board):
