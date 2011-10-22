@@ -7,49 +7,53 @@ def containsAny(str, set):
 	return 1 in [c in str for c in set]
 
 def decodeNotation(player,str,board):
-#	if (len(str) == 2):
-#		assert containsAny(str[:1],"abcdefgh")
-#		assert containsAny(str[1:],"12345678")
-#		piece = "p"
-#		mtype = "pawnsimple"
-#		return checkInitial(player,piece,board,mtype,str)
-#
+	if (len(str) == 2) and (containsAny(str[:1],"abcdefgh")) and (containsAny(str[1:],"12345678")):
+		piece = "p"
+		mtype = "pawnsimple"
+#		if takingOwnPiece(player,board,toCoord) != 1 and checkInitial(player,piece,toCoord,board,mtype,str) != 1:
+#			return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
+#		else:
+#			return 1
+
 	if (len(str) == 3) and (containsAny(str[0],"KQRBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"12345678") == 1):
 		piece = str[0]
 		mtype = "3"
 		toCoord = chessToCoord(str[1:])
-		if takingOwnPiece(player,board,toCoord) != 1 and checkInitial(player,piece,toCoord,board,mtype,str) != 1:
-			return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
-		else:
-			return 1
+#		if takingOwnPiece(player,board,toCoord) != 1 and checkInitial(player,piece,toCoord,board,mtype,str) != 1:
+#			return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
+#		else:
+#			return 1
 
 	if (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
 		mtype = "coord"
 		piece = "unknown"
 		toCoord = chessToCoord(str[2:])
-		if takingOwnPiece(player,board,toCoord) == 1:
-			return 1
-		return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
+#		if takingOwnPiece(player,board,toCoord) != 1 and checkInitial(player,piece,toCoord,board,mtype,str) != 1:
+#			return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
+#		else:
+#			return 1
 
 #	if (len(str) == 4) and (containsAny(str[1],"x") == 0):
 #		mtype = "take"
 #	if (len(str) == 4) and (containsAny(str[1:],"+") == 0):
 #		mtype = "check"
 #	if (len(str) == 5):
-#		
+	if takingOwnPiece(player,board,toCoord) != 1 and checkInitial(player,piece,toCoord,board,mtype,str) != 1:
+		return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
 	else:
 		return 1
+#		
 
 def checkInitial(player,piece,toCoord,board,mtype,str):
 
-#	if mtype == "pawnsimple":
-#		toCoord = chessToCoord(str)
-#		print board[toCoord[1]][toCoord[0]]
-#		if player in board[toCoord[1]][toCoord[0]]:
-#				print "You cant take your own pieces!"
-#		else:
-#			posFrom = [toCoord[0],toCoord[1]+1]
-#			return posFrom
+	if mtype == "pawnsimple":
+		toCoord = chessToCoord(str)
+		print board[toCoord[1]][toCoord[0]]
+		if player in board[toCoord[1]][toCoord[0]]:
+				print "You cant take your own pieces!"
+		else:
+			posFrom = [toCoord[0],toCoord[1]+1]
+			return posFrom
 	if mtype == "3":
 		coords = checkWhere(player,piece)
 		count = 0
@@ -57,6 +61,7 @@ def checkInitial(player,piece,toCoord,board,mtype,str):
 			print "This is fromcoord",fromCoord
 			if checkLegal(fromCoord,toCoord,board,piece) != 1:
 				count = count + 1
+				print 
 				posFrom = fromCoord
 				if count > 1:
 					print "There are multiple pieces which can do that move"
@@ -123,9 +128,9 @@ def checkLegal(posFrom,posTo, board, piece):
 	pmove = [0,0]
 	pmove[0] = posTo[0]-posFrom[0]
 	pmove[1] = posTo[1]-posFrom[1]
-	if "r" in piece:
+	if "R" in piece:
 		return checkPlus(posFrom,posTo,pmove,board)
-	if "b" in piece:
+	if "B" in piece:
 		return checkCross(posFrom,posTo,pmove,board,piece)
 	if "Q" in piece:
 		if (checkCross(posFrom,posTo,pmove,board,piece)==1) and (checkPlus(posFrom,posTo,pmove,board,piece)==1):
@@ -133,7 +138,7 @@ def checkLegal(posFrom,posTo, board, piece):
 			return 1
 	if "p" in piece:
 		return checkPawn(posFrom,posTo,pmove,board,piece)
-	if "n" in piece:
+	if "N" in piece:
 		return checkKnight(posFrom,posTo,pmove,board)
 	if "K" in piece:
 		return checkKing(pmove)
