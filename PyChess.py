@@ -9,59 +9,45 @@ def containsAny(str, set):
 def decodeNotation(player,str,board):
 	if (len(str) == 2) and (containsAny(str[:1],"abcdefgh")) and (containsAny(str[1:],"12345678")):
 		piece = "p"
-		mtype = "pawnsimple"
-#		if takingOwnPiece(player,board,toCoord) != 1 and checkInitial(player,piece,toCoord,board,mtype,str) != 1:
-#			return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
-#		else:
-#			return 1
-
-	if (len(str) == 3) and (containsAny(str[0],"KQRBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"12345678") == 1):
-		piece = str[0]
 		mtype = "3"
+		toCoord = chessToCoord(str)
+
+	elif (len(str) == 3) and (containsAny(str[0],"KQRBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"12345678") == 1):
+		piece = str[0]
+		mtype = "normal"
 		toCoord = chessToCoord(str[1:])
-#		if takingOwnPiece(player,board,toCoord) != 1 and checkInitial(player,piece,toCoord,board,mtype,str) != 1:
-#			return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
-#		else:
-#			return 1
 
-	if (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
-		mtype = "coord"
+	elif (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
 		piece = "unknown"
+		mtype = "coord"
 		toCoord = chessToCoord(str[2:])
-#		if takingOwnPiece(player,board,toCoord) != 1 and checkInitial(player,piece,toCoord,board,mtype,str) != 1:
-#			return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
-#		else:
-#			return 1
 
-#	if (len(str) == 4) and (containsAny(str[1],"x") == 0):
-#		mtype = "take"
+	elif (len(str) == 4) and (containsAny(str[0],"KQRBNp") == 1) and (containsAny(str[1],"x") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
+		mtype = "normaltake"
+		piece = str[0]
+		toCoord = chessToCoord(str[2:])
+
 #	if (len(str) == 4) and (containsAny(str[1:],"+") == 0):
 #		mtype = "check"
 #	if (len(str) == 5):
+	else: # This could be refactored
+		return 1
 	if takingOwnPiece(player,board,toCoord) != 1 and checkInitial(player,piece,toCoord,board,mtype,str) != 1:
 		return toCoord,checkInitial(player,piece,toCoord,board,mtype,str)
 	else:
-		return 1
-#		
+		return 1	
 
 def checkInitial(player,piece,toCoord,board,mtype,str):
-
-	if mtype == "pawnsimple":
-		toCoord = chessToCoord(str)
-		print board[toCoord[1]][toCoord[0]]
-		if player in board[toCoord[1]][toCoord[0]]:
-				print "You cant take your own pieces!"
-		else:
-			posFrom = [toCoord[0],toCoord[1]+1]
-			return posFrom
-	if mtype == "3":
+	if mtype[:6] == "normal":
+		if (mtype[6:] == "take") and (board[toCoord[1]][toCoord[0]] == "  "):
+			print "You aren't taking anything"
 		coords = checkWhere(player,piece)
 		count = 0
 		for fromCoord in coords:
 			print "This is fromcoord",fromCoord
 			if checkLegal(fromCoord,toCoord,board,piece) != 1:
 				count = count + 1
-				print 
+				print count
 				posFrom = fromCoord
 				if count > 1:
 					print "There are multiple pieces which can do that move"
@@ -69,7 +55,7 @@ def checkInitial(player,piece,toCoord,board,mtype,str):
 		if count == 1:
 			return posFrom
 		return 1
-	if mtype == "coord":
+	elif mtype == "coord":
 		fromCoord = chessToCoord(str[:2])
 		print fromCoord
 		if player not in board[fromCoord[1]][fromCoord[0]]:
@@ -99,10 +85,6 @@ def checkWhere(player, piece):
 				count = count + 1
 				coords.append([coordx-((coordy)*8),coordy])
 	return coords
-
-#def letterToNum(str):
-#	out = replace(str, "W","1")
-#	return replace(out, "B","2")
 
 def chessToCoord(str):
 	coord = [0,0]
@@ -178,6 +160,7 @@ def checkCross(posFrom,posTo,pmove,board,piece):
 			return 1
 
 def checkPawn(posFrom,posTo,pmove,board,piece):	# Needs en passant support
+	print pmove
 	if ("1" in piece):
 		if (pmove[1] > 0):
 			print "Pawns can't move backwards"
@@ -186,8 +169,9 @@ def checkPawn(posFrom,posTo,pmove,board,piece):	# Needs en passant support
 		if (pmove[1] < 0):
 			print "Pawns can't move backwards"
 			return 1
-	if  (abs(pmove[1]) > 2):
+	if (abs(pmove[1]) > 2):
 		print "A pawn can't move more than 2 squares in the y-direction under any circumstances"
+		return 1
 	if (abs(pmove[1]) != 1) and (posFrom[1] != 1) and (posFrom[1] != 6):
 		print "A pawn can only move 1 square in the y-direction"
 		return 1
@@ -198,6 +182,10 @@ def checkPawn(posFrom,posTo,pmove,board,piece):	# Needs en passant support
 		print "No piece to be taken"
 		return 1
 	if (abs(pmove[1]) == 2) and (pmove[0] != 0):
+		print "Can't move like that"
+		return 1
+	if (abs(pmove[0]) == 0) and (board[posTo[1]][posTo[0]] != "  "):
+		print "Can't take moving directly forward"
 		return 1
 
 def checkKnight(posFrom,posTo,pmove,board):
