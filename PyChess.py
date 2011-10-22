@@ -27,9 +27,11 @@ def decodeNotation(player,str,board):
 		piece = str[0]
 		toCoord = chessToCoord(str[2:])
 
-#	if (len(str) == 4) and (containsAny(str[1:],"+") == 0):
+#	elif (len(str) == 4) and (containsAny(str[1:],"+") == 0):
 #		mtype = "check"
-#	if (len(str) == 5):
+
+#	elif (len(str) == 5):
+
 	else: # This could be refactored
 		return 1
 	if takingOwnPiece(player,board,toCoord) != 1 and checkInitial(player,piece,toCoord,board,mtype,str) != 1:
@@ -44,10 +46,8 @@ def checkInitial(player,piece,toCoord,board,mtype,str):
 		coords = checkWhere(player,piece)
 		count = 0
 		for fromCoord in coords:
-			print "This is fromcoord",fromCoord
 			if checkLegal(fromCoord,toCoord,board,piece) != 1:
 				count = count + 1
-				print count
 				posFrom = fromCoord
 				if count > 1:
 					print "There are multiple pieces which can do that move"
@@ -57,7 +57,6 @@ def checkInitial(player,piece,toCoord,board,mtype,str):
 		return 1
 	elif mtype == "coord":
 		fromCoord = chessToCoord(str[:2])
-		print fromCoord
 		if player not in board[fromCoord[1]][fromCoord[0]]:
 			print "Select your own piece"
 			return 1
@@ -254,7 +253,7 @@ def player(board, num, history):
 board = [									# This is the original board
 ["2R","2N","2B","2Q","2K","2B","2N","2R"],
 ["2p","2p","2p","2p","2p","2p","2p","2p"],	# I changed bishops and knights the right way round
-["  ","  ","  ","  ","  ","  ","  ","  "],	# n = Knights, as in normal chess notation, "N"
+["  ","  ","  ","  ","  ","  ","  ","  "],	# N = Knights, as in normal chess notation, "N"
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
