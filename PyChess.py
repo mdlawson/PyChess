@@ -1,7 +1,6 @@
 import sys
 import os
 from string import replace
-from termcolor import colored
 
 def containsAny(str, set):
 	return 1 in [c in str for c in set]
@@ -26,11 +25,6 @@ def decodeNotation(player,str,board):
 		mtype = "normaltake"
 		piece = str[0]
 		toCoord = chessToCoord(str[2:])
-
-#	elif (len(str) == 4) and (containsAny(str[1:],"+") == 0):
-#		mtype = "check"
-
-#	elif (len(str) == 5):
 
 	else: # This could be refactored
 		return 1
@@ -205,7 +199,7 @@ def printBoard(board):	# Prints board obviously, colored comes from library
 	for row in board:
 		for column in row:
 			if i==True: 
-				sys.stdout.write(colored(" "+column+" ", "grey","on_white"))
+				sys.stdout.write('\033[47m\033[30m '+column+' \033[0m')
 				i=not i
 			else:
 				sys.stdout.write(" "+column+" ")
@@ -221,30 +215,7 @@ def player(board, num, history):
 			print "Invalid input"
 		else:
 			toCoord,fromCoord = decodeNotation(num,naturalInput,board)
-			break
-#		else :
-#			toCoord = [0,0]
-#			toCoord = chessToCoord(naturalInput[2:])
-#
-#			break
-#		while True:
-#			fromCoord = chessToCoord(raw_input("Enter the piece you want to move: "))
-#			if edgeDetect(fromCoord[0], fromCoord[1]) == 0:
-#				piece = board[fromCoord[1]][fromCoord[0]]
-#				print "Piece selected:",piece
-#				if str(num) in letterToNum(piece):
-#					break
-#				else: 
-#					print "Invalid piece!"
-#		toCoord = chessToCoord(raw_input("Enter the destination to move to: "))
-#		if edgeDetect(toCoord[0],toCoord[1]) == 0:
-#			if str(num) in letterToNum(board[toCoord[1]][toCoord[0]]):
-#				print "You cant take your own pieces!"
-#			elif checkLegal(fromCoord,toCoord, board, piece) == 1:
-#				print "Ilegal move!"
-#			else: 
-#				break
-	
+			break	
 	Coord = [fromCoord[0], fromCoord[1], toCoord[0], toCoord[1]]
 	print Coord
 	history.append(Coord)
