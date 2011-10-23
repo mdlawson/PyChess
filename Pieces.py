@@ -7,38 +7,38 @@ class Rook:
 	def moves(self, pos):
 		return mappingLoop(pos, self)
 class Bishop:
-	def isLegal(move):
+	def isLegal(self, move):
 		if abs(move[0])==abs(move[1]):
 			return 0
 		else:
 			return 1
-	def moves(pos):
+	def moves(self, pos):
 		return mappingLoop(pos, self)
 class Knight:
-	def isLegal(move):
+	def isLegal(self, move):
 		move = [abs(move[0]),abs(move[1])]
 		if move == [1,2] or move == [2,1]:
 			return 0
 		else:
 			return 1
-	def moves(pos):
+	def moves(self, pos):
 		return mappingLoop(pos, self)
 class King:
-	def isLegal(move):
+	def isLegal(self, move):
 		move = [abs(move[0]),abs(move[1])]
 		if move == [1,0] or move == [0,1] or move == [1,1]:
 			return 0
 		else:
 			return 1
-	def moves(pos):
+	def moves(self, pos):
 		return mappingLoop(pos, self)
 class Queen:
-	def isLegal(move):
-		if Bishop.isLegal(move) or Rook.isLegal(move):
+	def isLegal(self, move):
+		if Bishop.isLegal(self, move) or Rook.isLegal(self, move):
 			return 0
 		else:
 			return 1
-	def moves(pos):
+	def moves(self, pos):
 		return mappingLoop(pos, self)
 
 def mappingLoop(pos, piece):
