@@ -5,6 +5,8 @@ class Rook: # This is a class for a piece
 		self.pos = pos
 		self.team = team #pieces position is saved as Piece.pos
 	def isLegal(self, move): # Piece.isLegal checks if a move is legal for th currect piece. takes 1 arg, as self is always supplied
+		if move == [0,0]:
+			return 1
 		if move[0] == 0 or move[1] == 0:
 			if checkingLoop(self, move) == 0:
 				return 0
@@ -21,6 +23,8 @@ class Bishop:
 		self.pos = pos
 		self.team = team
 	def isLegal(self, move):
+		if move == [0,0]:
+			return 1
 		if abs(move[0])==abs(move[1]):
 			if checkingLoop(self, move) == 0:
 				return 0
@@ -65,6 +69,8 @@ class Queen:
 		self.pos = pos
 		self.team = team
 	def isLegal(self, move):
+		if move == [0,0]:
+			return 1
 		if abs(move[0])==abs(move[1]) or move[0] == 0 or move[1] == 0:
 			if checkingLoop(self, move) == 0:
 				return 0
@@ -100,9 +106,9 @@ def checkingLoop(piece, move): # generic collision detection function, should wo
 	else:
 		xRange = range(1, move[1]+1, 1)
 	for y,x in izip_longest(yRange,xRange, fillvalue=0):
-		print y, ",", x
+		#print y, ",", x
 		if board[piece.pos[0]+y][piece.pos[1]+x] != "   ":
-			print "there is a piece in the way!"
+			#print "there is a piece in the way!"
 			return 1
 	return 0
 
