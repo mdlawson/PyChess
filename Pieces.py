@@ -1,3 +1,5 @@
+from itertools import izip_longest
+
 class Rook:
 	def isLegal(self, move):
 		if move[0] == 0 or move[1] == 0:
@@ -53,30 +55,31 @@ def mappingLoop(pos, piece):
 				print "Invalid!"
 	return valid
 
-#def checkingLoop(from, move, board):
-#	if move[0] < 0:
-#		yRange = range(0, move[0], -1)
-#	else:
-#		yRange = range(move[0])
-#	if move[1] < 0:
-#		xRange = range(0, move[1], -1)
-#	else:
-#		xRange = range(move[1])
-#	for x in xRange for y in yRange:
-#		print x, ",", y
-#		if board[from[0]+y][from[1]+x] != "  "
-#			return 1
+def checkingLoop(posFrom, move, board):
+	if move[0] < 0:
+		yRange = range(-1, move[0]-1, -1)
+	else:
+		yRange = range(1, move[0]+1, 1)
+	if move[1] < 0:
+		xRange = range(-1, move[1]-1, -1)
+	else:
+		xRange = range(1, move[1]+1, 1)
+	for y,x in izip_longest(yRange,xRange, fillvalue=0):
+		print y, ",", x
+		if board[posFrom[0]+y][posFrom[1]+x] != "  ":
+			print "there is a piece in the way!"
 	
 
 board = [									# This is the original board
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],	# I changed bishops and knights the right way round
 ["  ","  ","  ","  ","  ","  ","  ","  "],	# N = Knights, as in normal chess notation, "N"
-["  ","  ","  ","1r","  ","2p","  ","  "],
+["  ","  ","hh","1r","  ","2p","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "]
 ]
 WR1 = Rook()
-mappingLoop([3,4],WR1)
+#mappingLoop([3,4],WR1)
+checkingLoop([3,3],[-3,0],board)
