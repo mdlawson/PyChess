@@ -12,7 +12,7 @@ class Rook: # This is a class for a piece
 	def moves(self): # Piece.moves() returns an array of valid moves for the piece
 		return mappingLoop(self)
 	def sayHi(self): # Useless function for testing
-		print "Hi, I'm a rook! I'm located at:",self.pos
+		print "Hi, I'm a rook! I'm located at:",self.pos,".Im on",teams[self.team]
 class Bishop:
 	def __init__(self, pos, team):
 		self.pos = pos
@@ -25,7 +25,7 @@ class Bishop:
 	def moves(self):
 		return mappingLoop(self)
 	def sayHi(self):
-		print "Hi, I'm a Bishop! I'm located at:",self.pos
+		print "Hi, I'm a Bishop! I'm located at:",self.pos,".Im on",teams[self.team]
 class Knight:
 	def __init__(self, pos, team):
 		self.pos = pos
@@ -39,7 +39,7 @@ class Knight:
 	def moves(self):
 		return mappingLoop(self)
 	def sayHi(self):
-		print "Hi, I'm a Knight! I'm located at:",self.pos
+		print "Hi, I'm a Knight! I'm located at:",self.pos,".Im on",teams[self.team]
 class King:
 	def __init__(self, pos, team):
 		self.pos = pos
@@ -53,7 +53,7 @@ class King:
 	def moves(self):
 		return mappingLoop(self)
 	def sayHi(self):
-		print "Hi, I'm the King! I'm located at:",self.pos
+		print "Hi, I'm the King! I'm located at:",self.pos,".Im on",teams[self.team]
 class Queen:
 	def __init__(self, pos, team):
 		self.pos = pos
@@ -66,7 +66,7 @@ class Queen:
 	def moves(self):
 		return mappingLoop(self)
 	def sayHi(self):
-		print "Hi, I'm the queen! I'm located at:",self.pos
+		print "Hi, I'm the queen! I'm located at:",self.pos,".Im on",teams[self.team]
 # note the absance of a pawn class. still thinking how to implement pawns in a class, as their legal checking requires much more arguments than everybody elses.
 
 def mappingLoop(piece): #produces an array of valid moves for any given piece, quite neat. However, random bug, seems to think the piece is in the wrong place vertically
@@ -100,7 +100,7 @@ def checkLegal(piece, move):
 	
 pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King} # A dictionary for translating piece short codes to piece classes	
 piece = {}
-teams = {'White':1,'Black':2}
+teams = {1:'White',2:'Black'}
 board = [									# This is a testing board
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
@@ -116,11 +116,9 @@ def setupPieces(board): # this is an init type function, sets up all the pieces 
 		for x in range(len(board[y])):
 			if board[y][x] != "  ":
 				print "Found piece",board[y][x],", creating new",pieces[board[y][x][-2]]
-				piece[board[y][x]] = (pieces[board[y][x][-2]])([y, x],board[y][x][0])
+				piece[board[y][x]] = (pieces[board[y][x][-2]])([y, x],int(board[y][x][0]))
 				piece[board[y][x]].sayHi()
 				print board[y][x]
-	print(board)
-	piece["1R2"].sayHi()
 #mappingLoop([3,4],WR1) # various testing stubs :P 
 #checkingLoop([3,3],[-3,0],board)
 setupPieces(board)
