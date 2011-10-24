@@ -4,6 +4,7 @@ class Rook: # This is a class for a piece
 	def __init__(self, pos, team): # when a new object of this class is made, its position needs to be supplied
 		self.pos = pos
 		self.team = team #pieces position is saved as Piece.pos
+		self.status = 0
 	def isLegal(self, move): # Piece.isLegal checks if a move is legal for th currect piece. takes 1 arg, as self is always supplied
 		if move[0] == 0 or move[1] == 0:
 			if checkingLoop(self, move) == 0:
@@ -20,6 +21,7 @@ class Bishop:
 	def __init__(self, pos, team):
 		self.pos = pos
 		self.team = team
+		self.status = 0
 	def isLegal(self, move):
 		if abs(move[0])==abs(move[1]):
 			if checkingLoop(self, move) == 0:
@@ -36,6 +38,7 @@ class Knight:
 	def __init__(self, pos, team):
 		self.pos = pos
 		self.team = team
+		self.status = 0
 	def isLegal(self, move):
 		move = [abs(move[0]),abs(move[1])]
 		if move == [1,2] or move == [2,1]:
@@ -50,6 +53,7 @@ class King:
 	def __init__(self, pos, team):
 		self.pos = pos
 		self.team = team
+		self.status = 0
 	def isLegal(self, move):
 		move = [abs(move[0]),abs(move[1])]
 		if move == [1,0] or move == [0,1] or move == [1,1]:
@@ -64,6 +68,7 @@ class Queen:
 	def __init__(self, pos, team):
 		self.pos = pos
 		self.team = team
+		self.status = 0
 	def isLegal(self, move):
 		if abs(move[0])==abs(move[1]) or move[0] == 0 or move[1] == 0:
 			if checkingLoop(self, move) == 0:
@@ -81,6 +86,7 @@ class Pawn:
 	def __init__(self, pos, team):
 		self.pos = pos
 		self.team = team
+		self.status = 0
 	def isLegal(self, move):
 		if move == [0,0]:						#Pawn can't stay still
 			return 1
@@ -137,11 +143,22 @@ def checkingLoop(piece, move): # generic collision detection function, should wo
 	return 0
 
 def checkLegal(piece, move):
-	if move == [0,0]:
+	if piece[board[posTo[0]][posTo[1]]].team == piece.team:
 		return 1
-	if piece.isLegal(move) != 0:
+	elif move == [0,0]:
 		return 1
-	
+	elif piece.isLegal(move) != 0:
+		return 1
+	else:
+		return 0
+
+def movePiece(piece, posTo):
+	if board[posTo[0]][posTo[1]] != "   ":
+		piece[board[posTo[0]][posTo[1]]].status = 1
+	board[posTo[0]][posTo[1]] = board[piece.pos[0]][piece.pos[1]]
+	board[piece.pos[0]][piece.pos[1]] = "   "
+	piece.pos[0],piece.pos[1] = posTo[0],posTo[1]
+
 pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King, 'p':Pawn} # A dictionary for translating piece short codes to piece classes	
 piece = {}
 teams = {1:'White',2:'Black'}
