@@ -102,19 +102,19 @@ pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King} # A dictionary for 
 piece = {}
 teams = {1:'White',2:'Black'}
 board = [									# This is a testing board
-["  ","  ","  ","  ","  ","  ","  ","  "],
-["  ","  ","  ","  ","  ","  ","  ","  "],
-["  ","  ","  ","  ","  ","  ","  ","  "],	
-["  ","  ","  ","  ","  ","  ","  ","  "],
-["  ","  ","  ","  ","  ","  ","  ","  "],
-["  ","  ","  ","  ","  ","  ","  ","  "],
-["  ","  ","  ","  ","  ","  ","  ","  "],
+["2R1","2N1","2B1","2Q1","2K1","2B2","2N2","2R2"],
+["2p1","2p2","2p3","2p4","2p5","2p6","2p7","2p8"],
+["   ","   ","   ","   ","   ","   ","   ","   "],	
+["   ","   ","   ","   ","   ","   ","   ","   "],	
+["   ","   ","   ","   ","   ","   ","   ","   "],	
+["   ","   ","   ","   ","   ","   ","   ","   "],	
+["1p1","1p2","1p3","1p4","1p5","1p6","1p7","1p8"],
 ["1R1","1N1","1B1","1Q1","1K1","1B2","1N2","1R2"]
 ]
 def setupPieces(board): # this is an init type function, sets up all the pieces on the board by calling them shortcode given on the board. problems with multiple pieces on same team needing uniques. 
 	for y in range(len(board)):
 		for x in range(len(board[y])):
-			if board[y][x] != "  ":
+			if board[y][x] != "   " and board[y][x][1] != "p":
 				print "Found piece",board[y][x],", creating new",pieces[board[y][x][-2]]
 				piece[board[y][x]] = (pieces[board[y][x][-2]])([y, x],int(board[y][x][0]))
 				piece[board[y][x]].sayHi()
