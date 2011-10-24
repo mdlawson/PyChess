@@ -69,12 +69,13 @@ class Queen:
 		print "Hi, I'm the queen! I'm located at:",self.pos,".Im on",teams[self.team]
 # note the absance of a pawn class. still thinking how to implement pawns in a class, as their legal checking requires much more arguments than everybody elses.
 
-def mappingLoop(piece): #produces an array of valid moves for any given piece, quite neat. However, random bug, seems to think the piece is in the wrong place vertically
+def mappingLoop(strpiece): #produces an array of valid moves for any given piece, quite neat. However, random bug, seems to think the piece is in the wrong place vertically
 	valid = []
 	for x in range(8):
 		for y in range(8):
 			print "Mapping [",x,",",y,"]...", 
-			if piece.isLegal([(y-piece.pos[0]),(x-piece.pos[1])]) == 0:
+#			piece[strpiece].sayHi()
+			if piece[strpiece].isLegal([(y-piece[strpiece].pos[0]),(x-piece[strpiece].pos[1])]) == 0:
 				print "Valid!"
 				valid.append([y,x])
 			else:
@@ -119,6 +120,7 @@ def setupPieces(board): # this is an init type function, sets up all the pieces 
 				piece[board[y][x]] = (pieces[board[y][x][-2]])([y, x],int(board[y][x][0]))
 				piece[board[y][x]].sayHi()
 				print board[y][x]
-#mappingLoop([3,4],WR1) # various testing stubs :P 
+#mappingLoop("1R1") # various testing stubs :P 
 #checkingLoop([3,3],[-3,0],board)
 setupPieces(board)
+mappingLoop("1Q1")
