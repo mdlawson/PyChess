@@ -119,7 +119,6 @@ def setupPieces(board): # this is an init type function, sets up all the pieces 
 				piece[board[y][x]] = (pieces[board[y][x][-2]])([y, x],board[y][x][0])
 				piece[board[y][x]].sayHi()
 				print board[y][x]
-			x = x+1
 	print(board)
 	piece["1R2"].sayHi()
 #mappingLoop([3,4],WR1) # various testing stubs :P 
