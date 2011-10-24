@@ -59,7 +59,7 @@ class Queen:
 		self.pos = pos
 		self.team = team
 	def isLegal(self, move):
-		if Bishop.isLegal(self, move) or Rook.isLegal(self, move):
+		if abs(move[0])==abs(move[1]) or move[0] == 0 or move[1] == 0:
 			return 0
 		else:
 			return 1
