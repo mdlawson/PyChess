@@ -6,7 +6,10 @@ class Rook: # This is a class for a piece
 		self.team = team #pieces position is saved as Piece.pos
 	def isLegal(self, move): # Piece.isLegal checks if a move is legal for th currect piece. takes 1 arg, as self is always supplied
 		if move[0] == 0 or move[1] == 0:
-			return 0
+			if checkingLoop(self, move) == 0:
+				return 0
+			else:
+				return 1
 		else:
 			return 1
 	def moves(self): # Piece.moves() returns an array of valid moves for the piece
@@ -19,7 +22,10 @@ class Bishop:
 		self.team = team
 	def isLegal(self, move):
 		if abs(move[0])==abs(move[1]):
-			return 0
+			if checkingLoop(self, move) == 0:
+				return 0
+			else:
+				return 1
 		else:
 			return 1
 	def moves(self):
@@ -60,7 +66,10 @@ class Queen:
 		self.team = team
 	def isLegal(self, move):
 		if abs(move[0])==abs(move[1]) or move[0] == 0 or move[1] == 0:
-			return 0
+			if checkingLoop(self, move) == 0:
+				return 0
+			else:
+				return 1
 		else:
 			return 1
 	def moves(self):
@@ -69,20 +78,19 @@ class Queen:
 		print "Hi, I'm the queen! I'm located at:",self.pos,".Im on",teams[self.team]
 # note the absance of a pawn class. still thinking how to implement pawns in a class, as their legal checking requires much more arguments than everybody elses.
 
-def mappingLoop(strpiece): #produces an array of valid moves for any given piece, quite neat. However, random bug, seems to think the piece is in the wrong place vertically
+def mappingLoop(piece): #produces an array of valid moves for any given piece, quite neat. However, random bug, seems to think the piece is in the wrong place vertically
 	valid = []
 	for x in range(8):
 		for y in range(8):
-			print "Mapping [",x,",",y,"]...", 
-#			piece[strpiece].sayHi()
-			if piece[strpiece].isLegal([(y-piece[strpiece].pos[0]),(x-piece[strpiece].pos[1])]) == 0:
+			print "Mapping [",x,",",y,"]...",
+			if piece.isLegal([(y-piece.pos[0]),(x-piece.pos[1])]) == 0:
 				print "Valid!"
 				valid.append([y,x])
 			else:
 				print "Invalid!"
 	return valid
 
-def checkingLoop(posFrom, move, board): # generic collision detection function, should work for any piece. prints the right output for squares to check, but doesnt check them yet. dont know why. random bugs :L
+def checkingLoop(piece, move): # generic collision detection function, should work for any piece. prints the right output for squares to check, but doesnt check them yet. dont know why. random bugs :L
 	if move[0] < 0:
 		yRange = range(-1, move[0]-1, -1)
 	else:
@@ -93,8 +101,11 @@ def checkingLoop(posFrom, move, board): # generic collision detection function, 
 		xRange = range(1, move[1]+1, 1)
 	for y,x in izip_longest(yRange,xRange, fillvalue=0):
 		print y, ",", x
-		if board[posFrom[0]+y][posFrom[1]+x] != "  ":
+		if board[piece.pos[0]+y][piece.pos[1]+x] != "   ":
 			print "there is a piece in the way!"
+			return 1
+	return 0
+
 def checkLegal(piece, move):
 	if piece.isLegal(move) != 0:
 		return 1
@@ -119,8 +130,7 @@ def setupPieces(board): # this is an init type function, sets up all the pieces 
 				print "Found piece",board[y][x],", creating new",pieces[board[y][x][-2]]
 				piece[board[y][x]] = (pieces[board[y][x][-2]])([y, x],int(board[y][x][0]))
 				piece[board[y][x]].sayHi()
-				print board[y][x]
 #mappingLoop("1R1") # various testing stubs :P 
 #checkingLoop([3,3],[-3,0],board)
 setupPieces(board)
-mappingLoop("1Q1")
+piece["1Q1"].moves()
