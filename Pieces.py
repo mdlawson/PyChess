@@ -141,7 +141,8 @@ def checkingLoop(piece, move): # generic collision detection function, should wo
 			return 1
 	return 0
 
-def checkLegal(piece, move):
+def checkLegal(piece, posTo):
+	move = [posTo[0]-piece.pos[0],posTo[1]-piece.pos[1]]
 	if pieceDict[board[posTo[0]][posTo[1]]].team == piece.team:
 		return 1
 	elif piece.isLegal(move) != 0:
