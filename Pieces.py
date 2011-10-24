@@ -113,16 +113,15 @@ board = [									# This is a testing board
 ]
 def setupPieces(board): # this is an init type function, sets up all the pieces on the board by calling them shortcode given on the board. problems with multiple pieces on same team needing uniques. 
 	for y in range(len(board)):
-		x = 0
-		for square in board[y]:
-			if square != "  ":
-				print "Found piece",square,", creating new",pieces[square[-2]]
-				piece[square] = (pieces[square[-2]])([y, x],square[0])
-				piece[square].sayHi()
-				print square
+		for x in range(len(board[y])):
+			if board[y][x] != "  ":
+				print "Found piece",board[y][x],", creating new",pieces[board[y][x][-2]]
+				piece[board[y][x]] = (pieces[board[y][x][-2]])([y, x],board[y][x][0])
+				piece[board[y][x]].sayHi()
+				print board[y][x]
 			x = x+1
 	print(board)
-	piece["1R1"].sayHi()
+	piece["1R2"].sayHi()
 #mappingLoop([3,4],WR1) # various testing stubs :P 
 #checkingLoop([3,3],[-3,0],board)
 setupPieces(board)
