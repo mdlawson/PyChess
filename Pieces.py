@@ -141,7 +141,7 @@ def checkingLoop(piece, move): # generic collision detection function, should wo
 	return 0
 
 def checkLegal(piece, move):
-	if piece[board[posTo[0]][posTo[1]]].team == piece.team:
+	if pieceDict[board[posTo[0]][posTo[1]]].team == piece.team:
 		return 1
 	elif piece.isLegal(move) != 0:
 		return 1
@@ -150,13 +150,13 @@ def checkLegal(piece, move):
 
 def movePiece(piece, posTo):
 	if board[posTo[0]][posTo[1]] != "   ":
-		piece[board[posTo[0]][posTo[1]]].status = 1
+		pieceDict[board[posTo[0]][posTo[1]]].status = 1
 	board[posTo[0]][posTo[1]] = board[piece.pos[0]][piece.pos[1]]
 	board[piece.pos[0]][piece.pos[1]] = "   "
 	piece.pos[0],piece.pos[1] = posTo[0],posTo[1]
 
 pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King, 'p':Pawn} # A dictionary for translating piece short codes to piece classes	
-piece = {}
+pieceDict = {}
 teams = {1:'White',2:'Black'}
 board = [									# This is a testing board
 ["1R1","1p1","   ","   ","   ","   ","2p1","2R1"],
@@ -173,9 +173,9 @@ def setupPieces(board): # this is an init type function, sets up all the pieces 
 		for y in range(len(board[x])):
 			if board[x][y] != "   ":
 				print "Found piece",board[x][y],", creating new",pieces[board[x][y][-2]]
-				piece[board[x][y]] = (pieces[board[x][y][-2]])([x, y],int(board[x][y][0]))
-				piece[board[x][y]].sayHi()
+				pieceDict[board[x][y]] = (pieces[board[x][y][-2]])([x, y],int(board[x][y][0]))
+				pieceDict[board[x][y]].sayHi()
 #mappingLoop("1R1") # various testing stubs :P 
 #checkingLoop([3,3],[-3,0],board)
 setupPieces(board)
-piece["1p1"].moves()
+pieceDict["1p1"].moves()
