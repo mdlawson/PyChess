@@ -99,7 +99,8 @@ def checkLegal(piece, move):
 		return 1
 	
 pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King} # A dictionary for translating piece short codes to piece classes	
-
+piece = {}
+teams = {'White':1,'Black':2}
 board = [									# This is a testing board
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
@@ -108,16 +109,20 @@ board = [									# This is a testing board
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
-["1R1","1N1","1B1","1Q1","1K1","  ","  ","  "]
+["1R1","1N1","1B1","1Q1","1K1","1B2","1N2","1R2"]
 ]
 def setupPieces(board): # this is an init type function, sets up all the pieces on the board by calling them shortcode given on the board. problems with multiple pieces on same team needing uniques. 
 	for y in range(len(board)):
-		for x in range(len(board[y])):
-			if board[y][x] != "  ":
-				print "Found piece",board[y][x],", creating new",pieces[board[y][x][-2]]
-				vars()['board[y][x]'] = (pieces[board[y][x][-2]])([y, x],board[y][x][0])
-				vars()['board[y][x]'].sayHi()
+		x = 0
+		for square in board[y]:
+			if square != "  ":
+				print "Found piece",square,", creating new",pieces[square[-2]]
+				piece[square] = (pieces[square[-2]])([y, x],square[0])
+				piece[square].sayHi()
+				print square
+			x = x+1
 	print(board)
+	piece["1R1"].sayHi()
 #mappingLoop([3,4],WR1) # various testing stubs :P 
 #checkingLoop([3,3],[-3,0],board)
 setupPieces(board)
