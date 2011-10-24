@@ -1,8 +1,9 @@
 from itertools import izip_longest
 
 class Rook: # This is a class for a piece
-	def __init__(self, pos): # when a new object of this class is made, its position needs to be supplied
-		self.pos = pos # the pieces position is saved as Piece.pos
+	def __init__(self, pos, team): # when a new object of this class is made, its position needs to be supplied
+		self.pos = pos
+		self.team = team #pieces position is saved as Piece.pos
 	def isLegal(self, move): # Piece.isLegal checks if a move is legal for th currect piece. takes 1 arg, as self is always supplied
 		if move[0] == 0 or move[1] == 0:
 			return 0
@@ -13,8 +14,9 @@ class Rook: # This is a class for a piece
 	def sayHi(self): # Useless function for testing
 		print "Hi, I'm a rook! I'm located at:",self.pos
 class Bishop:
-	def __init__(self, pos):
+	def __init__(self, pos, team):
 		self.pos = pos
+		self.team = team
 	def isLegal(self, move):
 		if abs(move[0])==abs(move[1]):
 			return 0
@@ -25,8 +27,9 @@ class Bishop:
 	def sayHi(self):
 		print "Hi, I'm a Bishop! I'm located at:",self.pos
 class Knight:
-	def __init__(self, pos):
+	def __init__(self, pos, team):
 		self.pos = pos
+		self.team = team
 	def isLegal(self, move):
 		move = [abs(move[0]),abs(move[1])]
 		if move == [1,2] or move == [2,1]:
@@ -38,8 +41,9 @@ class Knight:
 	def sayHi(self):
 		print "Hi, I'm a Knight! I'm located at:",self.pos
 class King:
-	def __init__(self, pos):
+	def __init__(self, pos, team):
 		self.pos = pos
+		self.team = team
 	def isLegal(self, move):
 		move = [abs(move[0]),abs(move[1])]
 		if move == [1,0] or move == [0,1] or move == [1,1]:
@@ -51,8 +55,9 @@ class King:
 	def sayHi(self):
 		print "Hi, I'm the King! I'm located at:",self.pos
 class Queen:
-	def __init__(self, pos):
+	def __init__(self, pos, team):
 		self.pos = pos
+		self.team = team
 	def isLegal(self, move):
 		if Bishop.isLegal(self, move) or Rook.isLegal(self, move):
 			return 0
@@ -89,8 +94,11 @@ def checkingLoop(posFrom, move, board): # generic collision detection function, 
 		print y, ",", x
 		if board[posFrom[0]+y][posFrom[1]+x] != "  ":
 			print "there is a piece in the way!"
-
-pieces = {'r':Rook,'n':Knight,'b':Bishop,'Q':Queen,'K':King} # A dictionary for translating piece short codes to piece classes	
+def checkLegal(piece, move):
+	if piece.isLegal(move) != 0:
+		return 1
+	
+pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King} # A dictionary for translating piece short codes to piece classes	
 
 board = [									# This is a testing board
 ["  ","  ","  ","  ","  ","  ","  ","  "],
@@ -100,15 +108,16 @@ board = [									# This is a testing board
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
 ["  ","  ","  ","  ","  ","  ","  ","  "],
-["1r","1n","1b","1Q","1K","  ","  ","  "]
+["1R","1N","1B","1Q","1K","  ","  ","  "]
 ]
 def setupPieces(board): # this is an init type function, sets up all the pieces on the board by calling them shortcode given on the board. problems with multiple pieces on same team needing uniques. 
 	for y in range(len(board)):
 		for x in range(len(board[y])):
 			if board[y][x] != "  ":
 				print "Found piece",board[y][x],", creating new",pieces[board[y][x][-1]]
-				board[y][x] = (pieces[board[y][x][-1]])([y, x])
-				board[y][x].sayHi()
+				vars()['board[y][x]'] = (pieces[board[y][x][-1]])([y, x],board[y][x][0])
+				vars()['board[y][x]'].sayHi()
+	print(board)
 #mappingLoop([3,4],WR1) # various testing stubs :P 
 #checkingLoop([3,3],[-3,0],board)
 setupPieces(board)
