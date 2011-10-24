@@ -88,8 +88,6 @@ class Pawn:
 		self.team = team
 		self.status = 0
 	def isLegal(self, move):
-		if move == [0,0]:						#Pawn can't stay still
-			return 1
 		if self.team == 1 and move[1] < 0:		#Pawn can't go backwards
 			return 1
 		if self.team == 2 and move[1] > 0:		#Pawn can't go backwards
@@ -144,8 +142,6 @@ def checkingLoop(piece, move): # generic collision detection function, should wo
 
 def checkLegal(piece, move):
 	if piece[board[posTo[0]][posTo[1]]].team == piece.team:
-		return 1
-	elif move == [0,0]:
 		return 1
 	elif piece.isLegal(move) != 0:
 		return 1
