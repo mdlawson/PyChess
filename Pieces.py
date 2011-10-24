@@ -1,4 +1,5 @@
 from itertools import izip_longest
+import sys
 
 class Rook: # This is a class for a piece
 	def __init__(self, pos, team): # when a new object of this class is made, its position needs to be supplied
@@ -154,6 +155,19 @@ def movePiece(piece, posTo):
 	board[posTo[0]][posTo[1]] = board[piece.pos[0]][piece.pos[1]]
 	board[piece.pos[0]][piece.pos[1]] = "   "
 	piece.pos[0],piece.pos[1] = posTo[0],posTo[1]
+def printBoard(board):	# Prints board obviously, colored comes from library
+	i = True
+	for j in range(len(board)):
+		for k in range(len(board[j])):
+			if i==True: 
+				sys.stdout.write('\033[47m\033[30m '+board[k][j]+' \033[0m')
+				i=not i
+			else:
+				sys.stdout.write(" "+board[k][j]+" ")
+				i=not i
+		print ""
+		i=not i
+
 
 pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King, 'p':Pawn} # A dictionary for translating piece short codes to piece classes	
 pieceDict = {}
@@ -178,4 +192,8 @@ def setupPieces(board): # this is an init type function, sets up all the pieces 
 #mappingLoop("1R1") # various testing stubs :P 
 #checkingLoop([3,3],[-3,0],board)
 setupPieces(board)
-pieceDict["1p1"].moves()
+#pieceDict["1p1"].moves()
+printBoard(board)
+movePiece(pieceDict["1p1"],[4,4])
+printBoard(board)
+pieceDict["1p1"].sayHi()
