@@ -82,7 +82,6 @@ class Queen:
 		return mappingLoop(self)
 	def sayHi(self):
 		print "Hi, I'm the queen! I'm located at:",self.pos,".Im on",teams[self.team]
-# note the absance of a pawn class. still thinking how to implement pawns in a class, as their legal checking requires much more arguments than everybody elses.
 class Pawn:
 	def __init__(self, pos, team):
 		self.pos = pos
@@ -111,8 +110,127 @@ class Pawn:
 		return mappingLoop(self)
 	def sayHi(self):
 		print "Hi, I'm a pawn! I'm located at:",self.pos,".Im on",teams[self.team]
-	
 
+def containsAny(str, set):
+	return 1 in [c in str for c in set]
+
+def takingOwnPiece(player,posTo):
+	if player in board[posTo[1]][posTo[0]]:
+		print "You can't take your own pieces!"
+		return 1
+
+def howMany(str):
+	if str == "p":
+		return 8
+	if str in "RNB":
+		return 2
+	if str in "QK":
+		return 1
+
+def findPiece(pieceType,posTo):
+		count = 0
+		i = 1
+		while i <= howMany(pieceType[1]):
+			if checkLegal(pieceDict[pieceType+`i`],posTo) == 0:
+				count = count + 1
+				piece = pieceType+`i`
+			i=i+1
+		if count == 0:
+			return "Piece can't move there"
+		if count != 1:
+			return "More than one piece can move there"
+
+
+def decodeNotation(player,str):
+	if (len(str) == 2) and (containsAny(str[:1],"abcdefgh")) and (containsAny(str[1:],"12345678")):
+		mtype = "normal"
+		pieceType = player+"p"
+		posTo = chessToCoord(str)
+	elif (len(str) == 3) and (containsAny(str[0],"KQRBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"12345678") == 1):
+		mtype = "normal"
+		pieceType = player+str[0]
+		posTo = chessToCoord(str[1:])
+#	elif str == "0-0":
+#		err,toCoord,fromCoord = checkCastling("kingside",player)
+#		if err == 0:
+#			return 0
+#		else:
+#			print err
+#			print "Can't castle"
+#			return 1,1
+#	elif str == "0-0-0":
+#		err,toCoord,fromCoord = checkCastling("queenside",player)
+#		if err == 0:
+#			return toCoord,fromCoord
+#		else:
+#			print err
+#			print "Can't castle"
+#			return 1,1
+	elif (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
+		pieceType = "unknown"
+		mtype = "coord"
+		posTo = chessToCoord(str[2:])
+		posFrom = chessToCoord(str[:2])
+		piece = board[posFrom[0]][posFrom[1]]
+	elif (len(str) == 4) and (containsAny(str[0],"KQRBNp") == 1) and (containsAny(str[1],"x") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
+		mtype = "normaltake"
+		pieceType = player+str[0]
+		posTo = chessToCoord(str[2:])
+#	elif (len(str) == 4) and (containsAny(str[1:],"+") == 0):
+#		mtype = "check"
+
+#	elif (len(str) == 5):
+	
+	else: # This could be refactored
+		return "Unknown Notation"
+
+	if mtype[:6] == "normal":
+		if (mtype[6:] == "take") and (board[posTo[0]][posTo[1]] == "   "):
+			print "You aren't taking anything"
+		result = findPiece(pieceType,posTo)
+		if result != 0:
+			return result
+	if checkLegal(pieceDict[piece],posTo) == 0:
+		movePiece(pieceDict[piece].pos,posTo)
+		return 0
+	else:
+		return "Move not Legal"
+def chessToCoord(str):
+	coord = [0,0]
+	char = str[:1]
+	coord[0] = ord(char)-97
+	num = str[1:]
+	coord[1] = int(num)-1
+	return coord
+
+#def workOutPosFrom(player,piece,toCoord,mtype,str):
+#	if mtype[:6] == "normal":
+#		if (mtype[6:] == "take") and (board[toCoord[1]][toCoord[0]] == "   "):
+#			print "You aren't taking anything"
+#		coords = checkWhere(player,piece)
+#		count = 0
+#		for fromCoord in coords:
+#			if checkLegal(fromCoord,toCoord,piece) == None:
+#				count = count + 1
+#				posFrom = fromCoord
+#				if count > 1:
+#					print "There are multiple pieces which can do that move"
+#					return 1
+#		if count == 1:
+#			return posFrom
+#		return 1
+#	elif mtype == "coord":
+#		fromCoord = chessToCoord(str[:2])
+#		if player not in board[fromCoord[1]][fromCoord[0]]:
+#			print "Select your own piece"
+#			return 1
+#		piece = board[fromCoord[1]][fromCoord[0]][1]
+#		if checkLegal(fromCoord,toCoord,piece) != None:
+#			print checkLegal(fromCoord,toCoord,piece)
+#			return 1
+#		else:
+#			return fromCoord
+			
 def mappingLoop(piece): #produces an array of valid moves for any given piece, quite neat. However, random bug, seems to think the piece is in the wrong place vertically
 	valid = []
 	for x in range(8):
@@ -143,19 +261,21 @@ def checkingLoop(piece, move): # generic collision detection function, should wo
 
 def checkLegal(piece, posTo):
 	move = [posTo[0]-piece.pos[0],posTo[1]-piece.pos[1]]
-	if pieceDict[board[posTo[0]][posTo[1]]].team == piece.team:
+	if piece.isLegal(move) != 0:
 		return 1
-	elif piece.isLegal(move) != 0:
-		return 1
-	else:
+	if board[posTo[0]][posTo[1]] == "   ":
+		return 0
+	if pieceDict[board[posTo[0]][posTo[1]]].team != piece.team and piece.isLegal(move) == 0:
 		return 0
 
-def movePiece(piece, posTo):
+def movePiece(posFrom, posTo):
 	if board[posTo[0]][posTo[1]] != "   ":
 		pieceDict[board[posTo[0]][posTo[1]]].status = 1
-	board[posTo[0]][posTo[1]] = board[piece.pos[0]][piece.pos[1]]
-	board[piece.pos[0]][piece.pos[1]] = "   "
-	piece.pos[0],piece.pos[1] = posTo[0],posTo[1]
+	board[posTo[0]][posTo[1]] = board[posFrom[0]][posFrom[1]]
+	board[posFrom[0]][posFrom[1]] = "   "
+	return 0
+#	posFrom[0],posFrom[1] = posTo[0],posTo[1]
+
 def printBoard(board):	# Prints board obviously, colored comes from library
 	i = True
 	for j in range(len(board)):
@@ -169,6 +289,23 @@ def printBoard(board):	# Prints board obviously, colored comes from library
 		print ""
 		i=not i
 
+def setupPieces(board): # this is an init type function, sets up all the pieces on the board by calling them shortcode given on the board. problems with multiple pieces on same team needing uniques. 
+	for x in range(len(board)):
+		for y in range(len(board[x])):
+			if board[x][y] != "   ":
+				print "Found piece",board[x][y],", creating new",pieces[board[x][y][-2]]
+				pieceDict[board[x][y]] = (pieces[board[x][y][-2]])([x, y],int(board[x][y][0]))
+
+def player(num):
+	print "Player",num,"turn: \n\n"
+	while True:
+		naturalInput = raw_input("Your move (standard chess notation):")
+		result = decodeNotation(num,naturalInput)
+		if result == 0:
+			break
+		else:
+			print result
+			print "Invalid input"
 
 pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King, 'p':Pawn} # A dictionary for translating piece short codes to piece classes	
 pieceDict = {}
@@ -183,18 +320,13 @@ board = [									# This is a testing board
 ["1N2","1p7","   ","   ","   ","   ","2p7","2N2"],
 ["1R2","1p8","   ","   ","   ","   ","2p8","2R2"]
 ]
-def setupPieces(board): # this is an init type function, sets up all the pieces on the board by calling them shortcode given on the board. problems with multiple pieces on same team needing uniques. 
-	for x in range(len(board)):
-		for y in range(len(board[x])):
-			if board[x][y] != "   ":
-				print "Found piece",board[x][y],", creating new",pieces[board[x][y][-2]]
-				pieceDict[board[x][y]] = (pieces[board[x][y][-2]])([x, y],int(board[x][y][0]))
-				pieceDict[board[x][y]].sayHi()
-#mappingLoop("1R1") # various testing stubs :P 
-#checkingLoop([3,3],[-3,0],board)
+history = []
+
+#MAIN LOOP
+quit = False
 setupPieces(board)
-#pieceDict["1p1"].moves()
-printBoard(board)
-movePiece(pieceDict["1p1"],[4,4])
-printBoard(board)
-pieceDict["1p1"].sayHi()
+while quit == False:
+	printBoard(board)
+	player("1")
+	printBoard(board)
+	player("2")
