@@ -1,308 +1,346 @@
 import sys
-import os
-from string import replace
+from itertools import izip_longest
+
+class Rook: # This is a class for a piece
+	def __init__(self, pos, color): # when a new object of this class is made, its position needs to be supplied
+		self.pos = pos
+		self.color = color #pieces position is saved as Piece.pos
+		self.status = 0
+	def isLegal(self, move): # Piece.isLegal checks if a move is legal for th currect piece. takes 1 arg, as self is always supplied
+		if move[0] == 0 or move[1] == 0:
+			if checkingLoop(self, move) == 0:
+				return 0
+			else:
+				return 1
+		else:
+			return 1
+	def moves(self): # Piece.moves() returns an array of valid moves for the piece
+		return mappingLoop(self)
+class Bishop:
+	def __init__(self, pos, color):
+		self.pos = pos
+		self.color = color
+		self.status = 0
+	def isLegal(self, move):
+		if abs(move[0])==abs(move[1]):
+			if checkingLoop(self, move) == 0:
+				return 0
+			else:
+				return 1
+		else:
+			return 1
+	def moves(self):
+		return mappingLoop(self)
+class Knight:
+	def __init__(self, pos, color):
+		self.pos = pos
+		self.color = color
+		self.status = 0
+	def isLegal(self, move):
+		move = [abs(move[0]),abs(move[1])]
+		if move == [1,2] or move == [2,1]:
+			return 0
+		else:
+			return 1
+	def moves(self):
+		return mappingLoop(self)
+class King:
+	def __init__(self, pos, color):
+		self.pos = pos
+		self.color = color
+		self.status = 0
+	def isLegal(self, move):
+		move = [abs(move[0]),abs(move[1])]
+		if move == [1,0] or move == [0,1] or move == [1,1]:
+			return 0
+		else:
+			return 1
+	def moves(self):
+		return mappingLoop(self)
+class Queen:
+	def __init__(self, pos, color):
+		self.pos = pos
+		self.color = color
+		self.status = 0
+	def isLegal(self, move):
+		if abs(move[0])==abs(move[1]) or move[0] == 0 or move[1] == 0:
+			if checkingLoop(self, move) == 0:
+				return 0
+			else:
+				return 1
+		else:
+			return 1
+	def moves(self):
+		return mappingLoop(self)
+class Pawn:
+	def __init__(self, pos, color):
+		self.pos = pos
+		self.color = color
+		self.status = 0
+	def isLegal(self, move):
+		if self.color == 1 and move[1] < 0:		 #Pawn can't go backwards
+			return 1
+		if self.color == 2 and move[1] > 0:		 #Pawn can't go backwards
+			return 1
+		if abs(move[1]) > 2:					#Pawn can't move more than 2 squares in y-direction in any circumstances
+			return 1
+		if abs(move[0]) > 1:					#Pawn can't move more than 1 square in x-direction under any circumstances
+			return 1
+		if abs(move[1]) != 1 and self.pos[1] != 1 and self.pos[1] != 6: #Pawn can only move two when haven't moved
+			return 1
+		if abs(move[0]) == 1 and abs(move[1]) != 1:
+			return 1
+		if abs(move[0]) == 1 and board[self.pos[0]+move[0]][self.pos[1]+move[1]] == "   ":
+			return 1
+		if abs(move[0]) == 0 and board[self.pos[0]+move[0]][self.pos[1]+move[1]] != "   ":
+			return 1
+		else:
+			return 0
+	def moves(self):
+		return mappingLoop(self)
+
+def mappingLoop(piece): #produces an array of valid moves for any given piece
+	valid = []
+	for x in range(8):
+		for y in range(8):
+			if piece.isLegal([(x-piece.pos[0]),(y-piece.pos[1])]) == 0:
+				valid.append([x,y])
+	return valid
+
+def checkingLoop(piece, move): # generic collision detection function
+	if move[0] < 0:
+		xRange = range(-1, move[0]-1, -1)
+	else:
+		xRange = range(1, move[0]+1, 1)
+	if move[1] < 0:
+		yRange = range(-1, move[1]-1, -1)
+	else:
+		yRange = range(1, move[1]+1, 1)
+	for x,y in izip_longest(xRange,yRange, fillvalue=0):
+		if board[piece.pos[0]+x][piece.pos[1]+y] != "   ":
+			return 1
+	return 0
 
 def containsAny(str, set):
 	return 1 in [c in str for c in set]
 
+def howMany(str):
+	if str == "p":
+		return 8
+	if str in "RNB":
+		return 2
+	if str in "QK":
+		return 1
+
 def decodeNotation(player,str):
 	if (len(str) == 2) and (containsAny(str[:1],"abcdefgh")) and (containsAny(str[1:],"12345678")):
-		piece = "p"
 		mtype = "normal"
-		toCoord = chessToCoord(str)
-
+		pieceType = player+"p"
+		posTo = chessToCoord(str)
 	elif (len(str) == 3) and (containsAny(str[0],"KQRBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"12345678") == 1):
-		piece = str[0]
 		mtype = "normal"
-		toCoord = chessToCoord(str[1:])
-	
+		pieceType = player+str[0]
+		posTo = chessToCoord(str[1:])
 	elif str == "0-0":
-		err,toCoord,fromCoord = checkCastling("kingside",player)
-		if err == 0:
-			return toCoord,fromCoord
-		else:
-			print err
-			print "Can't castle"
-			return 1,1
-
+	   err = checkCastling("kingside",player)
+	   if err == 0:
+		   return 0
+	   else:
+		   return err
 	elif str == "0-0-0":
-		err,toCoord,fromCoord = checkCastling("queenside",player)
-		if err == 0:
-			return toCoord,fromCoord
-		else:
-			print err
-			print "Can't castle"
-			return 1,1
-
+	   err = checkCastling("queenside",player)
+	   if err == 0:
+		   return 0
+	   else:
+		   return err
 	elif (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
-		piece = "unknown"
+		pieceType = "unknown"
 		mtype = "coord"
-		toCoord = chessToCoord(str[2:])
-
+		posTo = chessToCoord(str[2:])
+		posFrom = chessToCoord(str[:2])
+		piece = board[posFrom[0]][posFrom[1]]
 	elif (len(str) == 4) and (containsAny(str[0],"KQRBNp") == 1) and (containsAny(str[1],"x") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
 		mtype = "normaltake"
-		piece = str[0]
-		toCoord = chessToCoord(str[2:])
+		pieceType = player+str[0]
+		posTo = chessToCoord(str[2:])
+#	   elif (len(str) == 4) and (containsAny(str[1:],"+") == 0):
+#		   mtype = "check"
 
-#	elif (len(str) == 4) and (containsAny(str[1:],"+") == 0):
-#		mtype = "check"
-
-#	elif (len(str) == 5):
-
+#	   elif (len(str) == 5):
+	
 	else: # This could be refactored
-		return 1,1
-	if takingOwnPiece(player,toCoord) == None and workOutPosFrom(player,piece,toCoord,mtype,str) != 1:
-		return toCoord,workOutPosFrom(player,piece,toCoord,mtype,str)
-	else:
-		return 1,1	
+		return "Unknown Notation"
 
-def workOutPosFrom(player,piece,toCoord,mtype,str):
 	if mtype[:6] == "normal":
-		if (mtype[6:] == "take") and (board[toCoord[1]][toCoord[0]] == "  "):
+		if (mtype[6:] == "take") and (board[posTo[0]][posTo[1]] == "   "):
 			print "You aren't taking anything"
-		coords = checkWhere(player,piece)
 		count = 0
-		for fromCoord in coords:
-			if checkLegal(fromCoord,toCoord,piece) == None:
+		for i in range(howMany(pieceType[1])):
+			i = i+1
+			if checkLegal(pieceDict[pieceType+`i`],posTo) == 0:
 				count = count + 1
-				posFrom = fromCoord
-				if count > 1:
-					print "There are multiple pieces which can do that move"
-					return 1
-		if count == 1:
-			return posFrom
-		return 1
-	elif mtype == "coord":
-		fromCoord = chessToCoord(str[:2])
-		if player not in board[fromCoord[1]][fromCoord[0]]:
-			print "Select your own piece"
-			return 1
-		piece = board[fromCoord[1]][fromCoord[0]][1]
-		if checkLegal(fromCoord,toCoord,piece) != None:
-			print checkLegal(fromCoord,toCoord,piece)
-			return 1
-		else:
-			return fromCoord
+				piece = pieceType+`i`
+		if count == 0:
+			return "Piece can't move there"
+		if count != 1:
+			return "More than one piece can move there"
+	if checkLegal(pieceDict[piece],posTo) == 0:
+		Coord = [pieceDict[piece].pos[0], pieceDict[piece].pos[1], posTo[0], posTo[1]]
+		history.append(Coord)
+		movePiece(pieceDict[piece].pos,posTo)
 
-def takingOwnPiece(player,toCoord):
-	if player in board[toCoord[1]][toCoord[0]]:
-		print "You can't take your own pieces!"
-		return 1
-
-def checkWhere(player, piece):
-	count = 0
-	coords = []
-	coordx = -1
-	coordy = -1
-	for i in board:
-		coordy = coordy + 1
-		for j in i:
-			coordx = coordx + 1
-			if j == str(player)+piece:
-				count = count + 1
-				coords.append([coordx-((coordy)*8),coordy])
-	return coords
+		return 0
+	else:
+		return "Move not Legal"
 
 def chessToCoord(str):
 	coord = [0,0]
 	char = str[:1]
 	coord[0] = ord(char)-97
 	num = str[1:]
-	coord[1] = 8-int(num)
+	coord[1] = int(num)-1
 	return coord
 
-def edgeDetect(x, y):
-	if (x < 8) and (y < 8) and (x > -1) and (y > -1): # Included idiot detection
+def checkLegal(piece, posTo):
+	move = [posTo[0]-piece.pos[0],posTo[1]-piece.pos[1]]
+	if piece.isLegal(move) != 0:
+		return 1
+	if board[posTo[0]][posTo[1]] == "   ":
 		return 0
-	else:
-		print "Ehmmm, that's off the board you git"
-		return 1
-
-def move(posFrom, posTo):
-	piece = board[posFrom[1]][posFrom[0]]
-	board[posFrom[1]][posFrom[0]] = "  "
-	board[posTo[1]][posTo[0]] = piece
-
-def checkLegal(posFrom,posTo, piece):
-	pmove = [0,0]
-	pmove[0] = posTo[0]-posFrom[0]
-	pmove[1] = posTo[1]-posFrom[1]
-	if "R" in piece:
-		return checkPlus(posFrom,posTo,pmove)
-	if "B" in piece:
-		return checkCross(posFrom,posTo,pmove,piece)
-	if "Q" in piece:
-		if (checkCross(posFrom,posTo,pmove,piece)==1) and (checkPlus(posFrom,posTo,pmove,piece)==1):
-			print "Invalid move for queen"
-			return 1
-	if "p" in piece:
-		return checkPawn(posFrom,posTo,pmove,piece)
-	if "N" in piece:
-		return checkKnight(posFrom,posTo,pmove)
-	if "K" in piece:
-		return checkKing(pmove)
-
-def checkingLoop(axis,pmove,posFrom):
-	for i in range(0,pmove[axis]-(pmove[axis]/abs(pmove[axis])),pmove[axis]/abs(pmove[axis])):
-		i = i+(pmove[axis]/abs(pmove[axis]))
-		if axis==0:
-			if board[posFrom[1-axis]][posFrom[axis]+i] != "  ":
-				return "there is a piece in the way!"
-		else:
-			if board[posFrom[axis]+i][posFrom[1-axis]] != "  ":
-				return "there is a piece in the way!"
-	
-def checkPlus(posFrom,posTo,pmove):
-	if (pmove[0] != 0) and (pmove[1] != 0):
-		if "Q" not in piece:
-			return "movement is not in a straight line"
-		return 1
-	if (pmove[1] == 0): 
-		return checkingLoop(0,pmove,posFrom)
-	else:
-		return checkingLoop(1,pmove,posFrom)
-
-def checkCross(posFrom,posTo,pmove,piece):
-	if abs(pmove[0])!=abs(pmove[1]):
-		if "Q" not in piece:	
-			return "movement is not in a diagonal line"
-		return 1
-	for i in range(0,pmove[0]-pmove[0]/abs(pmove[0]),pmove[0]/abs(pmove[0])):
-		i = i+(pmove[0]/abs(pmove[0]))
-		j = abs(i)*(pmove[1]/abs(pmove[1]))
-		if board[posFrom[1]+j][posFrom[0]+i] != "  ":
-			return "there is a piece in the way!"
-
-def checkPawn(posFrom,posTo,pmove,piece):	# Needs en passant support
-	if ("1" in piece):
-		if (pmove[1] > 0): 
-			return "Pawns can't move backwards"
-	if ("2" in piece): 
-		if (pmove[1] < 0):
-			return "Pawns can't move backwards"
-	if (abs(pmove[1]) > 2):
-		return "A pawn can't move more than 2 squares in the y-direction under any circumstances"
-	if (abs(pmove[1]) != 1) and (posFrom[1] != 1) and (posFrom[1] != 6):
-		return "A pawn can only move 1 square in the y-direction"
-	if (pmove[0] != 0) and (abs(pmove[0]) != 1) and (abs(pmove[1]) != 1):
-		return "Can't move like that"
-	if (abs(pmove[0]) == 1) and (abs(pmove[1]) == 1) and (board[posTo[1]][posTo[0]] == "  "):
-		return "No piece to be taken"
-	if (abs(pmove[1]) == 2) and (pmove[0] != 0):
-		return "Can't move like that"
-	if (abs(pmove[0]) == 0) and (board[posTo[1]][posTo[0]] != "  "):
-		return "Can't take moving directly forward"
-	if (abs(pmove[0]) >1):
-		return "Can't move like that"
-
-def checkKnight(posFrom,posTo,pmove):
-	nmove = [abs(pmove[0]),abs(pmove[1])]
-	if (nmove != [1,2]) and (nmove != [2,1]):
-		return "Invalid move for Knight"
-
-def checkKing(pmove):	# Needs checking to whether King is moving into check, and castling needed as well
-	kmove = [abs(pmove[0]),abs(pmove[1])]
-	if (kmove != [0,1]) and (kmove != [1,0]) and (kmove != [1,1]):
-		return "King can only move one space at a time"
+	if pieceDict[board[posTo[0]][posTo[1]]].color != piece.color and piece.isLegal(move) == 0:
+		return 0
 
 def checkCastling(str,player):
-	if checkHistory(str,player) != None:
-		return checkHistory(str,player),1,1
+	if checkHistory(str,player) != 0:
+		return checkHistory(str,player)
 	if player == "1":
 		if str == "kingside":
-			if checkingLoop(0,[2,0],[4,7]) != None:
-				return "There is a piece in the way",1,1
-			move([4,7],[6,7])
-			return 0,[5,7],[7,7]
+			if checkingLoop(pieceDict["1R2"],[-2,0]) == 1:
+				return "There is a piece in the way"
+			movePiece([4,0],[6,0])
+			movePiece([7,0],[5,0])
+			return 0
 		elif str == "queenside":
-			print "ola"
-			if checkingLoop(0,[-3,0],[4,7]) != None:
-				print "allah"
-				return "There is a piece in the way",1,1
-			move([4,7],[1,7])
-			return 0,[2,7],[0,7]
+			if checkingLoop(pieceDict["1R1"],[3,0]) == 1:
+				return "There is a piece in the way"
+			movePiece([4,0],[1,0])
+			movePiece([0,0],[2,0])
+			return 0
 	elif player == "2":
 		if str == "kingside":
-			if checkingLoop(0,[2,0],[4,0]) != None:
-				return "There is a piece in the way",1,1
-			move([4,0],[6,0])
-			return 0,[5,0],[7,0]
+			if checkingLoop(pieceDict["2R2"],[-2,0]) == 1:
+				return "There is a piece in the way"
+			movePiece([4,7],[6,7])
+			movePiece([7,7],[5,7])
+			return 0
 		elif str == "queenside":
-			if checkingLoop(0,[-3,0],[4,0]) != None:
-				return "There is a piece in the way",1,1
-			move([4,0],[1,0])
-			return 0,[2,0],[0,0]
+			if checkingLoop(pieceDict["2R1"],[3,0]) == 1:
+				return "There is a piece in the way"
+			movePiece([4,7],[1,7])
+			movePiece([0,7],[2,7])
+			return 0
 
 def checkHistory(str,player):
 	if player == "1":
 		for i in history:
-			if (i[0] == 4) and (i[1] == 7):
+			if (i[0] == 4) and (i[1] == 0):
 				print i[0],i[1]
 				return "You've already moved your king"
-		if str == "kingside":
-			for i in history:
-				if (i[0] == 7) and (i[1] == 7):
-					return "You've already moved your rook"
-		if str == "queenside":
-			for i in history:
-				if (i[0] == 0) and (i[1] == 7):
-					return "You've already moved your rook"
+	if str == "kingside":
+		for i in history:
+			if (i[0] == 7) and (i[1] == 0):
+				return "You've already moved your rook"
+	if str == "queenside":
+		for i in history:
+			if (i[0] == 0) and (i[1] == 0):
+				return "You've already moved your rook"
 	if player == "2":
 		for i in history:
-			if (i[2] == 4) and (i[3] == 0):
+			if (i[2] == 4) and (i[3] == 7):
 				return "You've already moved your king"
-		if str == "kingside":
-			for i in history:
-				if (i[2] == 7) and (i[3] == 0):
-					return "You've already moved your rook"
-		if str == "queenside":
-			for i in history:
-				if (i[2] == 0) and (i[3] == 0):
-					return "You've already moved your rook"
+	if str == "kingside":
+		for i in history:
+			if (i[2] == 7) and (i[3] == 7):
+				return "You've already moved your rook"
+	if str == "queenside":
+		for i in history:
+			if (i[2] == 0) and (i[3] == 7):
+				return "You've already moved your rook"
+	return 0
 
-def printBoard(board):	# Prints board obviously, colored comes from library
-	#os.system("clear")
+def isCheck(piece):
+	if pieceDict[str(int(not piece.color)+1)+"K1"] in piece.moves():
+		print "Check!"
+		return True
+	else:
+		print "Not Check!"
+		return False
+
+def movePiece(posFrom, posTo):
+	if board[posTo[0]][posTo[1]] != "   ":
+		pieceDict[board[posTo[0]][posTo[1]]].status = 1
+	board[posTo[0]][posTo[1]] = board[posFrom[0]][posFrom[1]]
+	board[posFrom[0]][posFrom[1]] = "   "
+	return 0
+
+def printBoard(board):  # Prints board 
 	i = True
-	for row in board:
-		for column in row:
+	for j in reversed(range(len(board))):
+		for k in range(len(board[j])):
 			if i==True: 
-				sys.stdout.write('\033[47m\033[30m '+column+' \033[0m')
-				i=not i
+				sys.stdout.write('\033[47m\033[30m '+board[k][j][:-1]+' \033[0m')
 			else:
-				sys.stdout.write(" "+column+" ")
-				i=not i
+				sys.stdout.write(" "+board[k][j][:-1]+" ")
+			i=not i
 		print ""
 		i=not i
+
+def setupPieces(board): # this is an init type function, sets up all the pieces on the board by calling them shortcode given on the board
+	for x in range(len(board)):
+		for y in range(len(board[x])):
+			if board[x][y] != "   ":
+				pieceDict[board[x][y]] = (pieces[board[x][y][-2]])([x, y],int(board[x][y][0]))
 
 def player(num):
 	print "Player",num,"turn: \n\n"
 	while True:
 		naturalInput = raw_input("Your move (standard chess notation):")
-		toCoord,fromCoord = decodeNotation(num,naturalInput)
-		if toCoord !=1:
+		result = decodeNotation(num,naturalInput)
+		if result == 0:
 			break
 		else:
+			print result
 			print "Invalid input"
-	
-	Coord = [fromCoord[0], fromCoord[1], toCoord[0], toCoord[1]]
-	history.append(Coord)
-	print history
-	move(fromCoord,toCoord)
-board = [									# This is the original board
-["2R","2N","2B","2Q","2K","2B","2N","2R"],
-["2p","2p","2p","2p","2p","2p","2p","2p"],	# I changed bishops and knights the right way round
-["  ","  ","  ","  ","  ","  ","  ","  "],	# N = Knights, as in normal chess notation, "N"
-["  ","  ","  ","  ","  ","  ","  ","  "],
-["  ","  ","  ","  ","  ","  ","  ","  "],
-["  ","  ","  ","  ","  ","  ","  ","  "],
-["1p","1p","1p","1p","1p","1p","1p","1p"],
-["1R","1N","1B","1Q","1K","1B","1N","1R"],
+
+#board = [									   # This is a testing board
+#["1R1","1p1","   ","   ","   ","   ","2p1","2R1"],
+#["1N1","1p2","   ","   ","   ","   ","2p2","2N1"],
+#["1B1","1p3","   ","   ","   ","   ","2p3","2B1"],	  
+#["1Q1","1p4","   ","   ","   ","   ","2p4","2Q1"],	  
+#["1K1","1p5","   ","   ","   ","   ","2p5","2K1"],	  
+#["1B2","1p6","   ","   ","   ","   ","2p6","2B2"],	  
+#["1N2","1p7","   ","   ","   ","   ","2p7","2N2"],
+#["1R2","1p8","   ","   ","   ","   ","2p8","2R2"]
+#]
+board = [									   # This is a testing board
+["1R1","1p1","   ","   ","   ","   ","2p1","2R1"],
+["   ","1p2","   ","   ","   ","   ","2p2","2N1"],
+["   ","1p3","   ","   ","   ","   ","2p3","2B1"],	  
+["   ","1p4","   ","   ","   ","   ","2p4","2Q1"],	  
+["1K1","1p5","   ","   ","   ","   ","2p5","2K1"],	  
+["1B2","1p6","   ","   ","   ","   ","2p6","2B2"],	  
+["1N2","1p7","   ","   ","   ","   ","2p7","2N2"],
+["1R2","1p8","   ","   ","   ","   ","2p8","2R2"]
 ]
 
+pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King, 'p':Pawn} # A dictionary for translating piece short codes to piece classes
+pieceDict = {}
+colors = {1:'White',2:'Black'}
 history = []
 
 #MAIN LOOP
 quit = False
+setupPieces(board)
 while quit == False:
 	printBoard(board)
 	player("1")
