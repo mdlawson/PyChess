@@ -114,11 +114,6 @@ class Pawn:
 def containsAny(str, set):
 	return 1 in [c in str for c in set]
 
-def takingOwnPiece(player,posTo):
-	if player in board[posTo[1]][posTo[0]]:
-		print "You can't take your own pieces!"
-		return 1
-
 def howMany(str):
 	if str == "p":
 		return 8
@@ -126,20 +121,6 @@ def howMany(str):
 		return 2
 	if str in "QK":
 		return 1
-
-def findPiece(pieceType,posTo):
-		count = 0
-		i = 1
-		while i <= howMany(pieceType[1]):
-			if checkLegal(pieceDict[pieceType+`i`],posTo) == 0:
-				count = count + 1
-				piece = pieceType+`i`
-			i=i+1
-		if count == 0:
-			return "Piece can't move there"
-		if count != 1:
-			return "More than one piece can move there"
-
 
 def decodeNotation(player,str):
 	if (len(str) == 2) and (containsAny(str[:1],"abcdefgh")) and (containsAny(str[1:],"12345678")):
@@ -187,14 +168,23 @@ def decodeNotation(player,str):
 	if mtype[:6] == "normal":
 		if (mtype[6:] == "take") and (board[posTo[0]][posTo[1]] == "   "):
 			print "You aren't taking anything"
-		result = findPiece(pieceType,posTo)
-		if result != 0:
-			return result
+		count = 0
+		i = 1
+		while i <= howMany(pieceType[1]):
+			if checkLegal(pieceDict[pieceType+`i`],posTo) == 0:
+				count = count + 1
+				piece = pieceType+`i`
+			i=i+1
+		if count == 0:
+			return "Piece can't move there"
+		if count != 1:
+			return "More than one piece can move there"
 	if checkLegal(pieceDict[piece],posTo) == 0:
 		movePiece(pieceDict[piece].pos,posTo)
 		return 0
 	else:
 		return "Move not Legal"
+
 def chessToCoord(str):
 	coord = [0,0]
 	char = str[:1]
@@ -202,34 +192,6 @@ def chessToCoord(str):
 	num = str[1:]
 	coord[1] = int(num)-1
 	return coord
-
-#def workOutPosFrom(player,piece,toCoord,mtype,str):
-#	if mtype[:6] == "normal":
-#		if (mtype[6:] == "take") and (board[toCoord[1]][toCoord[0]] == "   "):
-#			print "You aren't taking anything"
-#		coords = checkWhere(player,piece)
-#		count = 0
-#		for fromCoord in coords:
-#			if checkLegal(fromCoord,toCoord,piece) == None:
-#				count = count + 1
-#				posFrom = fromCoord
-#				if count > 1:
-#					print "There are multiple pieces which can do that move"
-#					return 1
-#		if count == 1:
-#			return posFrom
-#		return 1
-#	elif mtype == "coord":
-#		fromCoord = chessToCoord(str[:2])
-#		if player not in board[fromCoord[1]][fromCoord[0]]:
-#			print "Select your own piece"
-#			return 1
-#		piece = board[fromCoord[1]][fromCoord[0]][1]
-#		if checkLegal(fromCoord,toCoord,piece) != None:
-#			print checkLegal(fromCoord,toCoord,piece)
-#			return 1
-#		else:
-#			return fromCoord
 			
 def mappingLoop(piece): #produces an array of valid moves for any given piece, quite neat. However, random bug, seems to think the piece is in the wrong place vertically
 	valid = []
