@@ -211,61 +211,39 @@ def checkLegal(piece, posTo):
 		return 0
 
 def checkCastling(str,player):
+	piece = player+"R"
 	if checkHistory(str,player) != 0:
 		return checkHistory(str,player)
 	if player == "1":
-		if str == "kingside":
-			if checkingLoop(pieceDict["1R2"],[-2,0]) == 1:
-				return "There is a piece in the way"
-			movePiece([4,0],[6,0])
-			movePiece([7,0],[5,0])
-			return 0
-		elif str == "queenside":
-			if checkingLoop(pieceDict["1R1"],[3,0]) == 1:
-				return "There is a piece in the way"
-			movePiece([4,0],[1,0])
-			movePiece([0,0],[2,0])
-			return 0
+		y = 0
 	elif player == "2":
-		if str == "kingside":
-			if checkingLoop(pieceDict["2R2"],[-2,0]) == 1:
-				return "There is a piece in the way"
-			movePiece([4,7],[6,7])
-			movePiece([7,7],[5,7])
-			return 0
-		elif str == "queenside":
-			if checkingLoop(pieceDict["2R1"],[3,0]) == 1:
-				return "There is a piece in the way"
-			movePiece([4,7],[1,7])
-			movePiece([0,7],[2,7])
-			return 0
+		y = 7
+	if str == "kingside":
+		piece = piece + "2"
+		checkx,bx,cx,dx = -2,6,7,5
+	elif str == "queenside":
+		piece = piece + "1"
+		checkx,bx,cx,dx = 3,1,0,2
+	if checkingLoop(pieceDict[piece],[checkx,0]) == 1:
+		return "There is a piece in the way"
+	movePiece([4,y],[bx,y])
+	movePiece([cx,y],[dx,y])
+	return 0
 
 def checkHistory(str,player):
 	if player == "1":
-		for i in history:
-			if (i[0] == 4) and (i[1] == 0):
-				print i[0],i[1]
-				return "You've already moved your king"
+		a,c,d = 0,1,0
+	elif player == "2":
+		a,c,d = 2,3,7
 	if str == "kingside":
+		b = [4,7]
+	elif str == "queenside":
+		b = [4,0]
+	while b != []:
 		for i in history:
-			if (i[0] == 7) and (i[1] == 0):
-				return "You've already moved your rook"
-	if str == "queenside":
-		for i in history:
-			if (i[0] == 0) and (i[1] == 0):
-				return "You've already moved your rook"
-	if player == "2":
-		for i in history:
-			if (i[2] == 4) and (i[3] == 7):
+			if (i[a] == b[0]) and (i[c] == d):
 				return "You've already moved your king"
-	if str == "kingside":
-		for i in history:
-			if (i[2] == 7) and (i[3] == 7):
-				return "You've already moved your rook"
-	if str == "queenside":
-		for i in history:
-			if (i[2] == 0) and (i[3] == 7):
-				return "You've already moved your rook"
+		b = b[1:]
 	return 0
 
 def isCheck(piece):
