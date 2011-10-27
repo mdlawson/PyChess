@@ -242,7 +242,10 @@ def checkHistory(str,player):
 	while b != []:
 		for i in history:
 			if (i[a] == b[0]) and (i[c] == d):
-				return "You've already moved your king"
+				if (b[0] == 4):
+					return "You've already moved your king"
+				else:
+					return "You've already moved your rook"
 		b = b[1:]
 	return 0
 
