@@ -133,6 +133,7 @@ def howMany(str):
 		return 1
 
 def decodeNotation(player,str):
+	global fiftymoverule
 	if (len(str) == 2) and (containsAny(str[:1],"abcdefgh")) and (containsAny(str[1:],"12345678")):
 		mtype = "normal"
 		pieceType = player+"p"
@@ -163,10 +164,10 @@ def decodeNotation(player,str):
 		mtype = "normaltake"
 		pieceType = player+str[0]
 		posTo = chessToCoord(str[2:])
-#	   elif (len(str) == 4) and (containsAny(str[1:],"+") == 0):
-#		   mtype = "check"
+#	elif (len(str) == 4) and (containsAny(str[1:],"+") == 0):
+#			mtype = "check"
 
-#	   elif (len(str) == 5):
+#	elif (len(str) == 5):
 	
 	else: # This could be refactored
 		return "Unknown Notation"
@@ -188,7 +189,9 @@ def decodeNotation(player,str):
 		Coord = [pieceDict[piece].pos[0], pieceDict[piece].pos[1], posTo[0], posTo[1]]
 		history.append(Coord)
 		movePiece(pieceDict[piece].pos,posTo)
-
+		pieceDict[piece].pos = posTo
+		if piece[1] == "p":
+			fiftymoverule = 0
 		return 0
 	else:
 		return "Move not Legal"
@@ -258,8 +261,10 @@ def isCheck(piece):
 		return False
 
 def movePiece(posFrom, posTo):
+	global fiftymoverule
 	if board[posTo[0]][posTo[1]] != "   ":
 		pieceDict[board[posTo[0]][posTo[1]]].status = 1
+		fiftymoverule = 0
 	board[posTo[0]][posTo[1]] = board[posFrom[0]][posFrom[1]]
 	board[posFrom[0]][posFrom[1]] = "   "
 	return 0
@@ -283,42 +288,38 @@ def setupPieces(board): # this is an init type function, sets up all the pieces 
 				pieceDict[board[x][y]] = (pieces[board[x][y][-2]])([x, y],int(board[x][y][0]))
 
 def player(num):
+	global fiftymoverule
 	print "Player",num,"turn: \n\n"
 	while True:
 		naturalInput = raw_input("Your move (standard chess notation):")
 		result = decodeNotation(num,naturalInput)
 		if result == 0:
+			fiftymoverule += 1
+			print fiftymoverule
 			break
 		else:
 			print result
 			print "Invalid input"
+	if fiftymoverule == 100:
+		print "There have been fifty moves without a pawn moving or a piece being taken"
+		quit = True
 
-#board = [									   # This is a testing board
-#["1R1","1p1","   ","   ","   ","   ","2p1","2R1"],
-#["1N1","1p2","   ","   ","   ","   ","2p2","2N1"],
-#["1B1","1p3","   ","   ","   ","   ","2p3","2B1"],	  
-#["1Q1","1p4","   ","   ","   ","   ","2p4","2Q1"],	  
-#["1K1","1p5","   ","   ","   ","   ","2p5","2K1"],	  
-#["1B2","1p6","   ","   ","   ","   ","2p6","2B2"],	  
-#["1N2","1p7","   ","   ","   ","   ","2p7","2N2"],
-#["1R2","1p8","   ","   ","   ","   ","2p8","2R2"]
-#]
-board = [									   # This is a testing board
+board = [
 ["1R1","1p1","   ","   ","   ","   ","2p1","2R1"],
-["   ","1p2","   ","   ","   ","   ","2p2","2N1"],
-["   ","1p3","   ","   ","   ","   ","2p3","2B1"],	  
-["   ","1p4","   ","   ","   ","   ","2p4","2Q1"],	  
-["1K1","1p5","   ","   ","   ","   ","2p5","2K1"],	  
-["1B2","1p6","   ","   ","   ","   ","2p6","2B2"],	  
+["1N1","1p2","   ","   ","   ","   ","2p2","2N1"],
+["1B1","1p3","   ","   ","   ","   ","2p3","2B1"],
+["1Q1","1p4","   ","   ","   ","   ","2p4","2Q1"],
+["1K1","1p5","   ","   ","   ","   ","2p5","2K1"],
+["1B2","1p6","   ","   ","   ","   ","2p6","2B2"],
 ["1N2","1p7","   ","   ","   ","   ","2p7","2N2"],
 ["1R2","1p8","   ","   ","   ","   ","2p8","2R2"]
 ]
 
+fiftymoverule = 0
 pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King, 'p':Pawn} # A dictionary for translating piece short codes to piece classes
 pieceDict = {}
 colors = {1:'White',2:'Black'}
 history = []
-
 #MAIN LOOP
 quit = False
 setupPieces(board)
