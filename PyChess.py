@@ -2,14 +2,15 @@ import sys
 from itertools import izip_longest
 
 class Piece:
-	def __init__(self, pos, color): # when a new object of this class is made, its position needs to be supplied
+	def __init__(self, pos, color): 
 		self.pos = pos
-		self.color = color #pieces position is saved as Piece.pos
+		self.color = color
 		self.status = 0
-	def moves(self): # Piece.moves() returns an array of valid moves for the piece
+	def moves(self):
 		return mappingLoop(self)
-class Rook(Piece): # This is a class for a piece
-	def isLegal(self, move): # Piece.isLegal checks if a move is legal for th currect piece. takes 1 arg, as self is always supplied
+
+class Rook(Piece): 
+	def isLegal(self, move): 
 		if move[0] == 0 or move[1] == 0:
 			return 0 if checkingLoop(self, move) == 0 else 1
 		else:
@@ -274,7 +275,6 @@ board = [									# This is a testing board
 
 pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King, 'p':Pawn} # A dictionary for translating piece short codes to piece classes
 pieceDict = {}
-colors = {1:'White',2:'Black'}
 history = []
 check = 0
 
