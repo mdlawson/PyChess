@@ -9,8 +9,8 @@ class Piece:
 	def moves(self):
 		return mappingLoop(self)
 
-class Rook(Piece): 
-	def isLegal(self, move): 
+class Rook(Piece): # This is a class for a piece
+	def isLegal(self, move): # Piece.isLegal checks if a move is legal for th currect piece. takes 1 arg, as self is always supplied
 		if move[0] == 0 or move[1] == 0:
 			return 0 if checkingLoop(self, move) == 0 else 1
 		else:
@@ -23,6 +23,7 @@ class Bishop(Piece):
 			return 1
 class Knight(Piece):
 	def isLegal(self, move):
+		move = [abs(move[0]),abs(move[1])]
 		move = [abs(move[0]),abs(move[1])]
 		return 0 if move == [1,2] or move == [2,1] else 1
 class King(Piece):
@@ -37,36 +38,55 @@ class Queen(Piece):
 			return 1
 class Pawn(Piece):
 	def isLegal(self, move):
-		if self.color == 1 and move[1] < 0:
+		if self.color == 1 and move[1] < 0:		 #Pawn can't go backwards
 			return 1
-		if self.color == 2 and move[1] > 0:
+		if self.color == 2 and move[1] > 0:		 #Pawn can't go backwards
 			return 1
-		if abs(move[1]) > 2 or abs(move[0]) > 1:
-			return 1			
-		if abs(move[1]) != 1 and self.pos[1] != 1 and self.pos[1] != 6:
+		if abs(move[1]) > 2:					#Pawn can't move more than 2 squares in y-direction in any circumstances
 			return 1
+		if abs(move[0]) > 1:					#Pawn can't move more than 1 square in x-direction under any circumstances
+			return 1
+		if abs(move[1]) != 1 and self.pos[1] != 1 and self.pos[1] != 6: #Pawn can only move two when haven't moved
+			return 1
+#		if abs(move[1]) == 2 and board[self.pos[0]][self.pos[1]+(move[1]/abs(move[1]))] != "   ":
+#			return 1
 		if abs(move[0]) == 1 and abs(move[1]) != 1:
 			return 1
 		if abs(move[0]) == 1 and board[self.pos[0]+move[0]][self.pos[1]+move[1]] == "   ":
 			return 1
 		if abs(move[0]) == 0 and board[self.pos[0]+move[0]][self.pos[1]+move[1]] != "   ":
 			return 1
-		return 0
-		
+		else:
+			return 0
+
 def mappingLoop(piece): #produces an array of valid moves for any given piece
 	valid = []
+	print "baaaaaaaaaa", pieceDict["2p2"].pos, board[pieceDict["2p2"].pos[0]][pieceDict["2p2"].pos[1]]
 	for x in range(8):
 		for y in range(8):
-			if piece.isLegal([(x-piece.pos[0]),(y-piece.pos[1])]) == 0:
+			if piece.isLegal([(x-piece.pos[0]),(y-piece.pos[1])]) == 0 and checkLegal(piece,[x,y]) == 0:
 				valid.append([x,y])
 	return valid
 
 def checkingLoop(piece, move): # generic collision detection function
-	yRange = range(-1, move[1]-1, -1) if move[0] < 0 else range(1, move[1]+1, 1)
-	xRange = range(-1, move[0]-1, -1) if move[1] < 0 else range(1, move[0]+1, 1)
+	capture = 0
+	xRange = range(-1, move[0]-1, -1) if move[0] < 0 else range(1, move[0]+1, 1)
+	yRange = range(-1, move[1]-1, -1) if move[1] < 0 else range(1, move[1]+1, 1)
+	#print xRange,yRange
 	for x,y in izip_longest(xRange,yRange, fillvalue=0):
-		if board[piece.pos[0]+x][piece.pos[1]+y] != "   ":
+#		if board[piece.pos[0]+x][piece.pos[1]+y] != "   ":
+#			return 1
+		#print piece.pos, piece.pos[0]+x, piece.pos[0]+y
+		#print piece.pos[0]+x,piece.pos[1]+y
+		#print "YO",pieceDict["2p1"].pos
+		if capture == 1:
 			return 1
+		if board[piece.pos[0]+x][piece.pos[1]+y][0] == str(piece.color):
+			#print "hello",board[piece.pos[0]+x][piece.pos[1]+y]
+			return 1
+		if board[piece.pos[0]+x][piece.pos[1]+y] != "   ":
+			#print "boo",board[piece.pos[0]+x][piece.pos[1]+y]
+			capture = 1
 	return 0
 
 def containsAny(str, set):
@@ -78,6 +98,7 @@ def howMany(str):
 	return 2 if str in "RNB" else 1 
 
 def decodeNotation(player,str):
+	global fiftymoverule
 	if (len(str) == 2) and (containsAny(str[:1],"abcdefgh")) and (containsAny(str[1:],"12345678")):
 		mtype = "normal"
 		pieceType = player+"p"
@@ -108,6 +129,11 @@ def decodeNotation(player,str):
 		mtype = "normaltake"
 		pieceType = player+str[0]
 		posTo = chessToCoord(str[2:])
+#	elif (len(str) == 4) and (containsAny(str[1:],"+") == 0):
+#			mtype = "check"
+
+#	elif (len(str) == 5):
+	
 	else: # This could be refactored
 		return "Unknown Notation"
 
@@ -116,7 +142,8 @@ def decodeNotation(player,str):
 			print "You aren't taking anything"
 		count = 0
 		for i in range(howMany(pieceType[1])):
-			if checkLegal(pieceDict[pieceType+`i`],posTo) == 0:
+			i = i+1
+			if checkLegal(pieceDict[pieceType+`i`],posTo) == 0 and pieceDict[pieceType+`i`].status != 1:
 				count = count + 1
 				piece = pieceType+`i`
 		if count == 0:
@@ -124,16 +151,51 @@ def decodeNotation(player,str):
 		if count != 1:
 			return "More than one piece can move there"
 	if checkLegal(pieceDict[piece],posTo) == 0:
+		global check
+		print pieceDict[piece].pos,posTo
+		oldPos = pieceDict[piece].pos
+		movePiece(pieceDict[piece].pos,posTo)
+		pieceDict[piece].pos = posTo
+		printBoard(board)
+		if int(player) == check:
+			if isCheck(int(player)) == True:
+				print "You are still in check!"
+				movePiece(posTo,oldPos)
+				return "Move not Legal"
+			else:
+				check = 0
+		if isCheck(int(player)) == True:
+			print "You are moving into check"
+			movePiece(posTo,oldPos)
+			return "Move not Legal"
+		if piece[1] == "p":
+			fiftymoverule = 0
 		Coord = [pieceDict[piece].pos[0], pieceDict[piece].pos[1], posTo[0], posTo[1]]
 		history.append(Coord)
-		movePiece(pieceDict[piece].pos,posTo)
-		oldPos = movePiece(pieceDict[piece].pos,posTo)
-		if player == check:
-			if isCheck(player):
-				print "You are still in check!"
-				movePiece(pieceDict[piece].pos,oldPos)
-				return 1
-		isCheck(int(not player-1)+1)
+		if isCheckmate((not (int(player)-1))+1) == True:
+			global quit
+			quit = True
+			if isCheck((not (int(player)-1))+1) == True:
+				return "That's checkmate"
+			else:
+				return "That's stalemate, BAHAHAHAHA"
+#		else:
+#			if isCheck((not (int(player)-1))+1) == True:
+#				print "Check!" 
+
+#		if isCheck((not (int(player)-1))+1) == True:
+#			if isCheckmate((not (int(player)-1))+1) == True:
+#				global quit
+#				quit = True
+#				return "That's checkmate"
+#			print "Check!"
+#		else:
+#			if isCheckmate((not (int(player)-1))+1) == True:
+#				global quit
+#				quit = True
+#				return "That's stalemate"
+		print pieceDict[piece].pos,posTo
+		print "1p1", pieceDict["2p1"].pos
 		return 0
 	else:
 		return "Move not Legal"
@@ -150,32 +212,50 @@ def checkLegal(piece, posTo):
 	move = [posTo[0]-piece.pos[0],posTo[1]-piece.pos[1]]
 	if piece.isLegal(move) != 0:
 		return 1
-	if board[posTo[0]][posTo[1]] == "   " or (pieceDict[board[posTo[0]][posTo[1]]].color != piece.color and piece.isLegal(move) == 0):
+	if board[posTo[0]][posTo[1]] == "   ":
 		return 0
+	if pieceDict[board[posTo[0]][posTo[1]]].color != piece.color and piece.isLegal(move) == 0:
+		return 0
+	else:
+		return 1
 
 def isCheck(color):
+	print "Yo"
+	global check
 	for piece in pieceDict:
-		if piece.color != color and piece.status != 1:
-			if pieceDict[str(color)+"K1"].pos in piece.moves():
-				print "Check!"
-				if isCheckmate(color):
-					endGame(color)
-				return True
+		if pieceDict[piece].color != color and pieceDict[piece].status != 1:
+			print piece
+#			print pieceDict[str(color)+"K1"].pos
+			print pieceDict[piece].moves()
+			if pieceDict[str(color)+"K1"].pos in pieceDict[piece].moves():
+#				if isCheckmate(color):
+#					endGame(color)
 				check = color
+				return True
 	return False
+
 def isCheckmate(color):
-	for move in pieceDict[str(color)+"K1"].moves():
-		for piece in pieceDict:
-			if piece.color != color and piece.status != 1:
-				if move not in piece.moves():
+#	print color
+	for piece in pieceDict:
+		if pieceDict[piece].color == color and pieceDict[piece].status != 1:
+			for move in pieceDict[piece].moves():
+				oldPos = pieceDict[piece].pos
+				oldPiece = board[move[0]][move[1]]
+				movePiece(pieceDict[piece].pos, move)
+				pieceDict[piece].pos = move
+				if isCheck(color) == False:
+					movePiece(move, oldPos)
+					if oldPiece != "   ":
+						pieceDict[oldPiece].status = 0
+					board[move[0]][move[1]] = oldPiece
+					pieceDict[piece].pos = oldPos
 					return False
-			elif piece.status != 1:
-				for move2 in piece.moves():
-					oldPos = movePiece(piece.pos, move2)
-					if isCheck(color) == False:
-						return False
-					movePiece(piece.pos,oldPos)
-	print "Thats checkmate!"
+				movePiece(pieceDict[piece].pos, oldPos)
+				if oldPiece != "   ":
+					pieceDict[oldPiece].status = 0
+				board[move[0]][move[1]] = oldPiece
+				pieceDict[piece].pos = oldPos
+#				print piece,move
 	return True
 
 def checkCastling(str,player):
@@ -218,13 +298,15 @@ def checkHistory(str,player):
 	return 0
 
 def movePiece(posFrom, posTo):
+	global fiftymoverule
 	if board[posTo[0]][posTo[1]] != "   ":
 		pieceDict[board[posTo[0]][posTo[1]]].status = 1
+		fiftymoverule = 0
 	board[posTo[0]][posTo[1]] = board[posFrom[0]][posFrom[1]]
 	board[posFrom[0]][posFrom[1]] = "   "
-	return posFrom
+	return 0
 
-def printBoard(board):	# Prints board 
+def printBoard(board):  # Prints board 
 	i = True
 	for j in reversed(range(len(board))):
 		for k in range(len(board[j])):
@@ -240,44 +322,53 @@ def setupPieces(board): # this is an init type function, sets up all the pieces 
 	for x in range(len(board)):
 		for y in range(len(board[x])):
 			if board[x][y] != "   ":
-				pieceDict[board[x][y]] = (pieces[board[x][y][-2]])([x, y],int(board[x][y][0]))
+				pieceDict[board[x][y]] = (pieces[board[x][y][1]])([x, y],int(board[x][y][0]))
 
 def player(num):
+	global fiftymoverule
 	print "Player",num,"turn: \n\n"
-	if check == num:
+	if check == int(num):
 		print "you are in CHECK"
 	while True:
 		naturalInput = raw_input("Your move (standard chess notation):")
 		result = decodeNotation(num,naturalInput)
 		if result == 0:
+			fiftymoverule += 1
 			break
 		else:
 			print result
-			print "Invalid input"
+	if fiftymoverule == 100:
+		global quit
+		print "There have been fifty moves without a pawn moving or a piece being taken"
+		quit = True
 
-def endGame(looser):
-	print "----------END OF GAME----------\n\nPlayer",(not looser-1)+1,"wins!"
-	print "Here is the summary of your game:"
-	print history
-	raw_input("Press any key to exit...")
-	exit()
-
-board = [									# This is a testing board
-["1R1","1p1","   ","   ","   ","   ","2p1","2R1"],
-["1N1","1p2","   ","   ","   ","   ","2p2","2N1"],
-["1B1","1p3","   ","   ","   ","   ","2p3","2B1"],	
-["1Q1","1p4","   ","   ","   ","   ","2p4","2Q1"],	
-["1K1","1p5","   ","   ","   ","   ","2p5","2K1"],	
+board = [
+["1R1","   ","   ","   ","   ","   ","   ","2R1"],
+["1N1","1p2","2p2","   ","1p1","   ","2p1","2N1"],
+["1B1","1p3","   ","   ","   ","   ","2p3","2B1"],
+["1Q1","1p4","   ","   ","   ","   ","2p4","2Q1"],
+["1K1","1p5","   ","   ","   ","   ","2p5","2K1"],
 ["1B2","1p6","   ","   ","   ","   ","2p6","2B2"],
 ["1N2","1p7","   ","   ","   ","   ","2p7","2N2"],
 ["1R2","1p8","   ","   ","   ","   ","2p8","2R2"]
 ]
+#board = [
+#["1R1","1p1","   ","   ","   ","   ","2p1","2R1"],
+#["1N1","1p2","   ","   ","   ","   ","2p2","2N1"],
+#["1B1","1p3","   ","   ","   ","   ","2p3","2B1"],
+#["1Q1","1p4","   ","   ","   ","   ","2p4","2Q1"],
+#["1K1","1p5","   ","   ","   ","   ","2p5","2K1"],
+#["1B2","1p6","   ","   ","   ","   ","2p6","2B2"],
+#["1N2","1p7","   ","   ","   ","   ","2p7","2N2"],
+#["1R2","1p8","   ","   ","   ","   ","2p8","2R2"]
+#]
 
+fiftymoverule = 0
 pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King, 'p':Pawn} # A dictionary for translating piece short codes to piece classes
 pieceDict = {}
+colors = {1:'White',2:'Black'}
 history = []
-check = 0
-
+check = 0 
 #MAIN LOOP
 quit = False
 setupPieces(board)
