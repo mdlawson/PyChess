@@ -63,7 +63,6 @@ class Pawn(Piece):
 
 def mappingLoop(piece): #produces an array of valid moves for any given piece
 	valid = []
-	#print "baaaaaaaaaa", pieceDict["2p2"].pos, board[pieceDict["2p2"].pos[0]][pieceDict["2p2"].pos[1]]
 	for x in range(8):
 		for y in range(8):
 			if piece.isLegal([(x-piece.pos[0]),(y-piece.pos[1])]) == 0 and checkLegal(piece,[x,y]) == 0:
@@ -74,20 +73,12 @@ def checkingLoop(piece, move): # generic collision detection function
 	capture = 0
 	xRange = range(-1, move[0]-1, -1) if move[0] < 0 else range(1, move[0]+1, 1)
 	yRange = range(-1, move[1]-1, -1) if move[1] < 0 else range(1, move[1]+1, 1)
-	#print xRange,yRange
 	for x,y in izip_longest(xRange,yRange, fillvalue=0):
-#		if board[piece.pos[0]+x][piece.pos[1]+y] != "   ":
-#			return 1
-		#print piece.pos, piece.pos[0]+x, piece.pos[0]+y
-		#print piece.pos[0]+x,piece.pos[1]+y
-		#print "YO",pieceDict["2p1"].pos
 		if capture == 1:
 			return 1
 		if board[piece.pos[0]+x][piece.pos[1]+y][0] == str(piece.color):
-			#print "hello",board[piece.pos[0]+x][piece.pos[1]+y]
 			return 1
 		if board[piece.pos[0]+x][piece.pos[1]+y] != "   ":
-			#print "boo",board[piece.pos[0]+x][piece.pos[1]+y]
 			capture = 1
 	return 0
 
@@ -165,11 +156,9 @@ def decodeNotation(player,str):
 			return "More than one piece can move there"
 	if checkLegal(pieceDict[piece],posTo) == 0:
 		global check
-		#print pieceDict[piece].pos,posTo
 		oldPos = pieceDict[piece].pos
 		movePiece(pieceDict[piece].pos,posTo)
 		pieceDict[piece].pos = posTo
-		#printBoard(board)
 		if int(player) == check:
 			if isCheck(int(player)) == True:
 				print "You are still in check!"
@@ -183,36 +172,21 @@ def decodeNotation(player,str):
 			pieceDict[piece].pos = oldPos
 			movePiece(posTo,oldPos)
 			return "Move not Legal"
-		if inputcheck == 1 and isCheck((not (int(player)-1))+1) != True:
-			print "That isn't check"
 		if piece[1] == "p":
 			fiftymoverule = 0
 		Coord = [pieceDict[piece].pos[0], pieceDict[piece].pos[1], posTo[0], posTo[1]]
 		history.append(Coord)
-		if isCheckmate((not (int(player)-1))+1) == True:
-			if isCheck((not (int(player)-1))+1) == True:
+		if isCheck((not (int(player)-1))+1) == True:
+			if isCheckmate((not (int(player)-1))+1) == True:
 				return "That's checkmate"
-			else:
+			elif inputcheckmate != 0:
+				print "That wasn't checkmate"
+		else:
+			if isCheckmate((not (int(player)-1))+1) == True:
 				return "That's stalemate, BAHAHAHAHA"
-		elif inputcheckmate != 0:
-			print "That wasn't checkmate"
-#		else:
-#			if isCheck((not (int(player)-1))+1) == True:
-#				print "Check!" 
-
-#		if isCheck((not (int(player)-1))+1) == True:
-#			if isCheckmate((not (int(player)-1))+1) == True:
-#				global quit
-#				quit = True
-#				return "That's checkmate"
-#			print "Check!"
-#		else:
-#			if isCheckmate((not (int(player)-1))+1) == True:
-#				global quit
-#				quit = True
-#				return "That's stalemate"
-		#print pieceDict[piece].pos,posTo
-		#print "1p1", pieceDict["2p1"].pos
+			if inputcheck == 1:
+				print "That isn't check"
+			check = 0
 		return 0
 	else:
 		return "Move not Legal"
@@ -237,29 +211,22 @@ def checkLegal(piece, posTo):
 		return 1
 
 def isCheck(color):
-	#print "Yo"
 	global check
 	for piece in pieceDict:
 		if pieceDict[piece].color != color and pieceDict[piece].status != 1:
-			print piece
-			print pieceDict[str(color)+"K1"].pos
-			print pieceDict[piece].moves()
 			if pieceDict[str(color)+"K1"].pos in pieceDict[piece].moves():
-#				if isCheckmate(color):
-#					endGame(color)
 				check = color
 				return True
 	return False
 
 def isCheckmate(color):
-#	print color
 	for piece in pieceDict:
 		if pieceDict[piece].color == color and pieceDict[piece].status != 1:
 			for move in pieceDict[piece].moves():
 				oldPos = pieceDict[piece].pos
-				oldPiece = board[move[0]][move[1]]
-				movePiece(pieceDict[piece].pos, move)
 				pieceDict[piece].pos = move
+				oldPiece = board[move[0]][move[1]]
+				movePiece(oldPos, move)
 				if isCheck(color) == False:
 					movePiece(move, oldPos)
 					if oldPiece != "   ":
@@ -272,7 +239,6 @@ def isCheckmate(color):
 					pieceDict[oldPiece].status = 0
 				board[move[0]][move[1]] = oldPiece
 				pieceDict[piece].pos = oldPos
-#				print piece,move
 	return True
 
 def checkCastling(str,player):
