@@ -92,6 +92,7 @@ def howMany(str):
 
 def decodeNotation(player,str):
 	global fiftymoverule
+	global check
 	inputcheck,inputcheckmate = 0,0
 	if str[-1] == "!":
 		str = str[:-1]
@@ -114,19 +115,18 @@ def decodeNotation(player,str):
 		pieceType = player+str[0]
 		posTo = chessToCoord(str[1:])
 	elif str == "0-0":
-	   err = checkCastling("kingside",player)
-	   if err == 0:
-		   return 0
-	   else:
-		   return err
+		err = checkCastling("kingside",player)
+		if err == 0:
+			return 0
+		else:
+			return err
 	elif str == "0-0-0":
-	   err = checkCastling("queenside",player)
-	   if err == 0:
-		   return 0
-	   else:
-		   return err
+		err = checkCastling("queenside",player)
+		if err == 0:
+			return 0
+		else:
+			return err
 	elif (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
-		pieceType = "unknown"
 		mtype = "coord"
 		posTo = chessToCoord(str[2:])
 		posFrom = chessToCoord(str[:2])
@@ -135,10 +135,58 @@ def decodeNotation(player,str):
 		mtype = "normaltake"
 		pieceType = player+str[0]
 		posTo = chessToCoord(str[2:])
-	#elif (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"x") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
-		
-
-	else: # This could be refactored
+	elif (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"x") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
+		mtype = "special"
+		posTo = chessToCoord(str[2:])
+		x = chessToCoord(str[0]+"1")[0]
+		count = 0
+		for piece1 in pieceDict:
+			if piece1[:2] == player+"p" and pieceDict[piece1].status != 1 and pieceDict[piece1].pos[0] == x and posTo in pieceDict[piece1].moves():
+				count = count + 1
+				piece = piece1
+		if count == 0:
+			return "There aren't any pawns on "+str[0]+"-file"
+		elif count != 1:
+			return "There is more than one pawn on the "+str[0]+"-file which can take that piece. Please be more specific"
+	elif (len(str) == 4) and (containsAny(str[0], "RBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
+		mtype = "special"
+		posTo = chessToCoord(str[2:])
+		x = chessToCoord(str[1]+"1")[0]
+		count = 0
+		for piece1 in pieceDict:
+			if piece1[:2] == player+str[0] and pieceDict[piece1].status != 1 and pieceDict[piece1].pos[0] == x and posTo in pieceDict[piece1].moves():
+				count = count + 1
+				piece = piece1
+		if count == 0:
+			return "There aren't any "+piecenames[str[0]]+"s on the "+str[1]+"-file"
+		elif count != 1:
+			return "There is more than one "+piecenames[str[0]]+" on the "+str[1]+"-file which can take that piece. Please be more specific"
+	elif (len(str) == 5) and (containsAny(str[0], "KQRBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"12345678") == 1) and (containsAny(str[3],"abcdefgh") == 1) and (containsAny(str[4],"12345678") == 1):
+		mtype = "coord"
+		posTo = chessToCoord(str[3:])
+		posFrom = chessToCoord(str[1:3])
+		piece = board[posFrom[0]][posFrom[1]]
+	elif (len(str) == 3) and (containsAny(str[0], "KQRBNp") == 1) and (str[1] == "x") and (containsAny(str[2], "KQRBNp") == 1):
+		mtype = "specialspecial"
+		listpiece1 = []
+		listpiece2 = []
+		for piece1 in pieceDict:
+			if piece1[:2] == player+str[0] and pieceDict[piece1].status != 1:
+				listpiece1.append(piece1)
+			if piece1[:2] == `((not (int(player)-1))+1)`+str[0] and pieceDict[piece1].status != 1:
+				listpiece2.append(piece1)
+		count = 0
+		for piece1 in listpiece1:
+			for piece2 in listpiece2:
+				if pieceDict[piece2].pos in pieceDict[piece1].moves():
+					piece = piece1
+					posTo = pieceDict[piece2].pos
+					count = count + 1
+		if count == 0:
+			return "No "+piecenames[str[0]]+"s are able to take an opposition's "+piecenames[str[2]]
+		elif count != 1:
+			return "Be more specific"
+	else:
 		return "Unknown Notation"
 
 	if mtype[:6] == "normal":
@@ -155,7 +203,6 @@ def decodeNotation(player,str):
 		if count != 1:
 			return "More than one piece can move there"
 	if checkLegal(pieceDict[piece],posTo) == 0:
-		global check
 		oldPos = pieceDict[piece].pos
 		movePiece(pieceDict[piece].pos,posTo)
 		pieceDict[piece].pos = posTo
@@ -242,7 +289,12 @@ def isCheckmate(color):
 	return True
 
 def checkCastling(str,player):
+	if isCheck(int(player)) == True:
+		return "Castling not permitted due to you being in check"
+	global check
 	piece = player+"R"
+	king = player+"K1"
+	oldPos = pieceDict[king].pos
 	if checkHistory(str,player) != 0:
 		return checkHistory(str,player)
 	if player == "1":
@@ -257,9 +309,17 @@ def checkCastling(str,player):
 		checkx,bx,cx,dx = 3,1,0,2
 	if checkingLoop(pieceDict[piece],[checkx,0]) == 1:
 		return "There is a piece in the way"
-	king = player+"K1"
-	pieceDict[king].pos = [bx,y]
-	movePiece([4,y],[bx,y])
+	xRange = range(-1, bx-5, -1) if bx-4 < 0 else range(1, bx-3, 1)
+	for x in xRange:
+		movePiece(pieceDict[king].pos,[oldPos[0]+x,pieceDict[king].pos[1]])
+		pieceDict[king].pos = [oldPos[0]+x,pieceDict[king].pos[1]]
+		if isCheck(int(player)) == True:
+			movePiece(pieceDict[king].pos,oldPos)
+			pieceDict[king].pos = oldPos
+			check = 0
+			return "Castling is not permitted due to you moving through or into check"
+	#pieceDict[king].pos = [bx,y]
+	#movePiece([4,y],[bx,y])
 	pieceDict[piece].pos = [dx,y]
 	movePiece([cx,y],[dx,y])
 	return 0
@@ -355,6 +415,7 @@ board = [
 
 fiftymoverule = 0
 pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King, 'p':Pawn} # A dictionary for translating piece short codes to piece classes
+piecenames = {'R':"Rook",'N':"Knight",'B':"Bishop",'Q':"Queen",'K':"King", 'p':"pawn"}
 pieceDict = {}
 colors = {1:'White',2:'Black'}
 history = []
