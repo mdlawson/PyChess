@@ -279,6 +279,8 @@ def decodeNotation(player,str):
 			return "Move not Legal"
 		if piece[1] == "p":
 			fiftymoverule = 0
+			if posTo[1] == 0 or posTo[1] == 7:
+				piece = promotePawn(posTo)
 		Coord = [pieceDict[piece].pos[0], pieceDict[piece].pos[1], posTo[0], posTo[1]]
 		history.append(Coord)
 		if isCheck((not (int(player)-1))+1) == True:
@@ -399,6 +401,13 @@ def checkHistory(str,player):
 		b = b[1:]
 	return 0
 
+def promotePawn(pos):
+	global pieceDict
+	del pieceDict[board[pos[0]][pos[1]]] 
+	board[pos[0]][pos[1]] = board[pos[0]][pos[1]][0]+"Q2" # rename pawn on board, currently always to Q2, needs to find ammount of queens and +1
+	pieceDict[board[pos[0]][pos[1]]] = Queen([pos[0], pos[1]],int(board[pos[0]][pos[1]][0]))
+	return board[pos[0]][pos[1]]
+
 def movePiece(posFrom, posTo):
 	global fiftymoverule
 	if board[posTo[0]][posTo[1]] != "   ":
@@ -501,11 +510,5 @@ while quit == False:
 	printBoard(board)
 	player("2")
 
-# no clue where to put this really
-# for a pawns move only, needs pawn pos
-def ascendPawn(pos):
-	del pieceDict[board[pos[0]][pos[1]]] # delete pawn from piece dict
-	board[pos[0][pos[1]]][1:3] = "Q2" # rename pawn on board, currently always to Q2, needs to find ammount of queens and +1
-	pieceDict[board[pos[0]][pos[1]]] = Queen([pos[0], pos[1]],int(board[x][y][0])) # make a new queen in the piece dict using the square
-# the pawn has been delted completely, and a new queen has been made in its place. huzzah!
+
 
