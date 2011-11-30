@@ -500,3 +500,12 @@ while quit == False:
 		break
 	printBoard(board)
 	player("2")
+
+# no clue where to put this really
+# for a pawns move only, needs pawn pos
+def ascendPawn(pos):
+	del pieceDict[board[pos[0]][pos[1]]] # delete pawn from piece dict
+	board[pos[0][pos[1]]][1:3] = "Q2" # rename pawn on board, currently always to Q2, needs to find ammount of queens and +1
+	pieceDict[board[pos[0]][pos[1]]] = Queen([pos[0], pos[1]],int(board[x][y][0])) # make a new queen in the piece dict using the square
+# the pawn has been delted completely, and a new queen has been made in its place. huzzah!
+
