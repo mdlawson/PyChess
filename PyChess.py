@@ -95,11 +95,6 @@ def checkingLoop(piece, move): # generic collision detection function
 def containsAny(str, set):
 	return 1 in [c in str for c in set]
 
-def howMany(str):
-	if str == "p":
-		return 8
-	return 2 if str in "RNB" else 1 
-
 def decodeNotation(player,str):
 	global fiftymoverule
 	global check
@@ -230,11 +225,10 @@ def decodeNotation(player,str):
 		if (mtype[6:] == "take") and (board[posTo[0]][posTo[1]] == "   "):
 			print "You aren't taking anything"
 		count = 0
-		for i in range(howMany(pieceType[1])):
-			i = i+1
-			if checkLegal(pieceDict[pieceType+`i`],posTo) == 0 and pieceDict[pieceType+`i`].status != 1:
+		for i in pieceDict:
+			if i[:2] == pieceType and checkLegal(pieceDict[i],posTo) == 0 and pieceDict[i].status != 1:
 				count = count + 1
-				piece = pieceType+`i`
+				piece = i
 		if count == 0:
 			return "Piece can't move there"
 		if count != 1:
@@ -435,6 +429,16 @@ def setupPieces(board): # this is an init type function, sets up all the pieces 
 def player(num):
 	global fiftymoverule
 	global quit
+	boardsave = ""
+	for i in board:
+		for j in i:
+			boardsave += j
+	threeboard.append(boardsave)
+	if threeboard.count(boardsave) == 3:
+		print "DRAW"
+		print "Due to threefold repitition"
+		quit = True
+		return 1
 	print "Player",num,"turn: \n\n"
 	if check == int(num):
 		print "you are in CHECK"
@@ -451,6 +455,7 @@ def player(num):
 				quit = True
 				break
 	if fiftymoverule == 100:
+		print "DRAW"
 		print "There have been fifty moves without a pawn moving or a piece being taken"
 		quit = True
 
@@ -483,6 +488,7 @@ colors = {1:'White',2:'Black'}
 history = []
 check = 0 
 enpassant = [0,0]
+threeboard = []
 takeenpassant = 0
 #MAIN LOOP
 quit = False
