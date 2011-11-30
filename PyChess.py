@@ -209,9 +209,7 @@ def decodeNotation(player,str):
 				listpiece2.append(piece1)
 		count = 0
 		for piece1 in listpiece1:
-			print piece1
 			for piece2 in listpiece2:
-				print piece2
 				if pieceDict[piece2].pos in pieceDict[piece1].moves():
 					piece = piece1
 					posTo = pieceDict[piece2].pos
@@ -405,10 +403,22 @@ def checkHistory(str,player):
 
 def promotePawn(pos):
 	global pieceDict
-	del pieceDict[board[pos[0]][pos[1]]] 
-	board[pos[0]][pos[1]] = board[pos[0]][pos[1]][0]+"Q2" # rename pawn on board, currently always to Q2, needs to find ammount of queens and +1
-	pieceDict[board[pos[0]][pos[1]]] = Queen([pos[0], pos[1]],int(board[pos[0]][pos[1]][0]))
-	return board[pos[0]][pos[1]]
+	input = 0
+	while input == 0:
+		pieceType = raw_input("Choose a piece: ")
+		if pieceType == "Q" or pieceType == "R" or pieceType == "B" or pieceType == "N":
+			input = 1
+		else:
+			print "Invalid piece. Type in Q, R, B or N"
+	del pieceDict[board[pos[0]][pos[1]]]
+	count = 1
+	for piece1 in pieceDict:
+		if piece1[:2] == board[pos[0]][pos[1]][0]+pieceType:
+			count = count+1
+	piece = board[pos[0]][pos[1]][0]+pieceType+`count`
+	board[pos[0]][pos[1]] =  piece # rename pawn on board, currently always to Q2, needs to find ammount of queens and +1
+	pieceDict[piece] = pieces[pieceType]([pos[0], pos[1]],int(board[pos[0]][pos[1]][0]))
+	return piece
 
 def movePiece(posFrom, posTo):
 	global fiftymoverule
