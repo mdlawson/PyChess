@@ -205,11 +205,13 @@ def decodeNotation(player,str):
 		for piece1 in pieceDict:
 			if piece1[:2] == player+str[0] and pieceDict[piece1].status != 1:
 				listpiece1.append(piece1)
-			if piece1[:2] == `((not (int(player)-1))+1)`+str[0] and pieceDict[piece1].status != 1:
+			if piece1[:2] == `((not (int(player)-1))+1)`+str[2] and pieceDict[piece1].status != 1:
 				listpiece2.append(piece1)
 		count = 0
 		for piece1 in listpiece1:
+			print piece1
 			for piece2 in listpiece2:
+				print piece2
 				if pieceDict[piece2].pos in pieceDict[piece1].moves():
 					piece = piece1
 					posTo = pieceDict[piece2].pos
@@ -509,6 +511,3 @@ while quit == False:
 		break
 	printBoard(board)
 	player("2")
-
-
-
