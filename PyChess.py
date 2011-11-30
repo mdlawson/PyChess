@@ -245,8 +245,9 @@ def decodeNotation(player,str):
 				pieceDict[board[posTo[0]][posTo[1]-1]].status = 1
 				board[posTo[0]][posTo[1]-1] = "   "
 			elif player == "2":
-				oldenpassant = pieceDict[board[posTo[0]][posTo[1]+1]]
-				pieceDict[board[posTo[0]][posTo[1]+1]].status = 1
+				if board[posTo[0]][posTo[1]+1] != "   ":
+					oldenpassant = pieceDict[board[posTo[0]][posTo[1]+1]]
+					pieceDict[board[posTo[0]][posTo[1]+1]].status = 1
 				board[posTo[0]][posTo[1]+1] = "   "
 		if int(player) == check:
 			if isCheck(int(player)) == True:
@@ -414,9 +415,9 @@ def promotePawn(pos):
 	count = 1
 	for piece1 in pieceDict:
 		if piece1[:2] == board[pos[0]][pos[1]][0]+pieceType:
-			count = count+1
+			count = int(piece1[-1])+1
 	piece = board[pos[0]][pos[1]][0]+pieceType+`count`
-	board[pos[0]][pos[1]] =  piece # rename pawn on board, currently always to Q2, needs to find ammount of queens and +1
+	board[pos[0]][pos[1]] =  piece
 	pieceDict[piece] = pieces[pieceType]([pos[0], pos[1]],int(board[pos[0]][pos[1]][0]))
 	return piece
 
