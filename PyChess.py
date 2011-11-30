@@ -94,18 +94,30 @@ def decodeNotation(player,str):
 	global fiftymoverule
 	global check
 	inputcheck,inputcheckmate = 0,0
+	if str[-2:] == "?!":
+		str = str[:-2]
+		print "?!?!?!?!?!"
+	if str[-2:] == "!?":
+		str = str[:-2]
+		print "!?!?!?!?!?"
+	if str[-2:] == "!!":
+		str = str[:-2]
+		print "Sheesh louise"
 	if str[-1] == "!":
 		str = str[:-1]
 		print "Alright, don't get cocky"
+	if str[-2:] == "??":
+		str = str[:-2]
+		print "Ehmmm??"
 	if str[-1] == "?":
 		str = str[:-1]
 		print "You weirdo"
-	if str[-1] == "+" and str[-2] != "+":
-		inputcheck = 1
-		str = str[:-1]
 	if str[-2:] == "++":
 		inputcheckmate = 1
 		str = str[:-2]
+	if str[-1] == "+":
+		inputcheck = 1
+		str = str[:-1]
 	if (len(str) == 2) and (containsAny(str[0],"abcdefgh")) and (containsAny(str[1],"12345678")):
 		mtype = "normal"
 		pieceType = player+"p"
@@ -161,6 +173,19 @@ def decodeNotation(player,str):
 			return "There aren't any "+piecenames[str[0]]+"s on the "+str[1]+"-file"
 		elif count != 1:
 			return "There is more than one "+piecenames[str[0]]+" on the "+str[1]+"-file which can take that piece. Please be more specific"
+	elif (len(str) == 4) and (containsAny(str[0], "RBNp") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
+		mtype = "special"
+		posTo = chessToCoord(str[2:])
+		x = chessToCoord("a"+str[1])[1]
+		count = 0
+		for piece1 in pieceDict:
+			if piece1[:2] == player+str[0] and pieceDict[piece1].status != 1 and pieceDict[piece1].pos[1] == x and posTo in pieceDict[piece1].moves():
+				count = count + 1
+				piece = piece1
+		if count == 0:
+			return "There aren't any "+piecenames[str[0]]+"s on the "+str[1]+"-rank"
+		elif count != 1:
+			return "There is more than one "+piecenames[str[0]]+" on the "+str[1]+"-rank which can take that piece. Please be more specific"
 	elif (len(str) == 5) and (containsAny(str[0], "KQRBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"12345678") == 1) and (containsAny(str[3],"abcdefgh") == 1) and (containsAny(str[4],"12345678") == 1):
 		mtype = "coord"
 		posTo = chessToCoord(str[3:])
@@ -318,8 +343,6 @@ def checkCastling(str,player):
 			pieceDict[king].pos = oldPos
 			check = 0
 			return "Castling is not permitted due to you moving through or into check"
-	#pieceDict[king].pos = [bx,y]
-	#movePiece([4,y],[bx,y])
 	pieceDict[piece].pos = [dx,y]
 	movePiece([cx,y],[dx,y])
 	return 0
