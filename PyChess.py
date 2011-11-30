@@ -38,6 +38,12 @@ class Queen(Piece):
 			return 1
 class Pawn(Piece):
 	def isLegal(self, move):
+		global enpassant
+		global takeenpassant
+#		if self.color == 1 and enpassant[1] == 3:
+#			enpassant = [0,0]
+#		if self.color == 2 and enpassant[1] == 4:
+#			enpassant = [0,0]
 		if self.color == 1 and move[1] < 0:		 #Pawn can't go backwards
 			return 1
 		if self.color == 2 and move[1] > 0:		 #Pawn can't go backwards
@@ -52,14 +58,18 @@ class Pawn(Piece):
 #			return 1
 		if abs(move[0]) == 1 and abs(move[1]) != 1:
 			return 1
+		if enpassant != [0,0] and board[self.pos[0]+move[0]][self.pos[1]+move[1]] == "   " and abs(move[0]) == 1 and abs(move[1]) == 1 and abs(self.pos[0]-enpassant[0]) == 1 and abs((self.pos[1]+move[1])-enpassant[1]) == 1:
+			takeenpassant = self
+			return 0
 		if abs(move[1]) == 2 and board[self.pos[0]+move[0]][self.pos[1]+(abs(move[1])/move[1])] != "   ":
 			return 1
 		if abs(move[0]) == 1 and board[self.pos[0]+move[0]][self.pos[1]+move[1]] == "   ":
 			return 1
 		if abs(move[0]) == 0 and board[self.pos[0]+move[0]][self.pos[1]+move[1]] != "   ":
 			return 1
-		else:
-			return 0
+#		if abs(move[1]) == 2:
+#			enpassant = [self.pos[0]+move[0],self.pos[1]+move[1]]
+		return 0
 
 def mappingLoop(piece): #produces an array of valid moves for any given piece
 	valid = []
@@ -93,6 +103,8 @@ def howMany(str):
 def decodeNotation(player,str):
 	global fiftymoverule
 	global check
+	global takeenpassant
+	global enpassant
 	inputcheck,inputcheckmate = 0,0
 	if str[-2:] == "?!":
 		str = str[:-2]
@@ -228,14 +240,33 @@ def decodeNotation(player,str):
 		if count != 1:
 			return "More than one piece can move there"
 	if checkLegal(pieceDict[piece],posTo) == 0:
+		if piece[1] == "p" and abs(posTo[1]-pieceDict[piece].pos[1]) == 2:
+			enpassant = pieceDict[piece].pos
 		oldPos = pieceDict[piece].pos
 		movePiece(pieceDict[piece].pos,posTo)
 		pieceDict[piece].pos = posTo
+		if takeenpassant == pieceDict[piece]:
+			if player == "1":
+				oldenpassant = pieceDict[board[posTo[0]][posTo[1]-1]]
+				pieceDict[board[posTo[0]][posTo[1]-1]].status = 1
+				board[posTo[0]][posTo[1]-1] = "   "
+			elif player == "2":
+				oldenpassant = pieceDict[board[posTo[0]][posTo[1]+1]]
+				pieceDict[board[posTo[0]][posTo[1]+1]].status = 1
+				board[posTo[0]][posTo[1]+1] = "   "
 		if int(player) == check:
 			if isCheck(int(player)) == True:
 				print "You are still in check!"
 				pieceDict[piece].pos = oldPos
 				movePiece(posTo,oldPos)
+				if takeenpassant == pieceDict[piece]:
+					if player == "1":
+						pieceDict[board[posTo[0]][posTo[1]-1]] = oldenpassant
+						pieceDict[board[posTo[0]][posTo[1]-1]].status = 0
+					elif player == "2":
+						pieceDict[board[posTo[0]][posTo[1]+1]] = oldenpassant
+						pieceDict[board[posTo[0]][posTo[1]+1]].status = 0
+					takeenpassant = 0
 				return "Move not Legal"
 			else:
 				check = 0
@@ -243,6 +274,14 @@ def decodeNotation(player,str):
 			print "You are moving into check"
 			pieceDict[piece].pos = oldPos
 			movePiece(posTo,oldPos)
+			if takeenpassant == pieceDict[piece]:
+				if player == "1":
+					pieceDict[board[posTo[0]][posTo[1]-1]] = oldenpassant
+					pieceDict[board[posTo[0]][posTo[1]-1]].status = 0
+				elif player == "2":
+					pieceDict[board[posTo[0]][posTo[1]+1]] = oldenpassant
+					pieceDict[board[posTo[0]][posTo[1]+1]].status = 0
+				takeenpassant = 0
 			return "Move not Legal"
 		if piece[1] == "p":
 			fiftymoverule = 0
@@ -443,6 +482,8 @@ pieceDict = {}
 colors = {1:'White',2:'Black'}
 history = []
 check = 0 
+enpassant = [0,0]
+takeenpassant = 0
 #MAIN LOOP
 quit = False
 setupPieces(board)
