@@ -38,12 +38,7 @@ class Queen(Piece):
 			return 1
 class Pawn(Piece):
 	def isLegal(self, move):
-		global enpassant
-		global takeenpassant
-#		if self.color == 1 and enpassant[1] == 3:
-#			enpassant = [0,0]
-#		if self.color == 2 and enpassant[1] == 4:
-#			enpassant = [0,0]
+		global enpassant, takeenpassant
 		if self.color == 1 and move[1] < 0:		 #Pawn can't go backwards
 			return 1
 		if self.color == 2 and move[1] > 0:		 #Pawn can't go backwards
@@ -54,8 +49,6 @@ class Pawn(Piece):
 			return 1
 		if abs(move[1]) != 1 and self.pos[1] != 1 and self.pos[1] != 6: #Pawn can only move two when haven't moved
 			return 1
-#		if abs(move[1]) == 2 and board[self.pos[0]][self.pos[1]+(move[1]/abs(move[1]))] != "   ":
-#			return 1
 		if abs(move[0]) == 1 and abs(move[1]) != 1:
 			return 1
 		if enpassant != [0,0] and board[self.pos[0]+move[0]][self.pos[1]+move[1]] == "   " and abs(move[0]) == 1 and abs(move[1]) == 1 and abs(self.pos[0]-enpassant[0]) == 1 and abs((self.pos[1]+move[1])-enpassant[1]) == 1:
@@ -67,8 +60,6 @@ class Pawn(Piece):
 			return 1
 		if abs(move[0]) == 0 and board[self.pos[0]+move[0]][self.pos[1]+move[1]] != "   ":
 			return 1
-#		if abs(move[1]) == 2:
-#			enpassant = [self.pos[0]+move[0],self.pos[1]+move[1]]
 		return 0
 
 def mappingLoop(piece): #produces an array of valid moves for any given piece
@@ -96,10 +87,7 @@ def containsAny(str, set):
 	return 1 in [c in str for c in set]
 
 def decodeNotation(player,str):
-	global fiftymoverule
-	global check
-	global takeenpassant
-	global enpassant
+	global fiftymoverule, check, takeenpassant, enpassant
 	inputcheck,inputcheckmate = 0,0
 	if str[-2:] == "?!":
 		str = str[:-2]
@@ -449,8 +437,8 @@ def setupPieces(board): # this is an init type function, sets up all the pieces 
 				pieceDict[board[x][y]] = (pieces[board[x][y][1]])([x, y],int(board[x][y][0]))
 
 def player(num):
-	global fiftymoverule
-	global quit
+	global fiftymoverule, quit, turn
+	turn = int(not(turn-1))+1
 	boardsave = ""
 	for i in board:
 		for j in i:
@@ -480,7 +468,6 @@ def player(num):
 		print "DRAW"
 		print "There have been fifty moves without a pawn moving or a piece being taken"
 		quit = True
-
 board = [
 ["1R1","1p1","   ","   ","   ","   ","2p1","2R1"],
 ["1N1","1p2","   ","   ","   ","   ","2p2","2N1"],
@@ -491,16 +478,6 @@ board = [
 ["1N2","1p7","   ","   ","   ","   ","2p7","2N2"],
 ["1R2","1p8","   ","   ","   ","   ","2p8","2R2"]
 ]
-#board = [
-#["1R1","1p1","   ","   ","   ","   ","2p1","2R1"],
-#["1N1","1p2","   ","   ","   ","   ","2p2","2N1"],
-#["1B1","1p3","   ","   ","   ","   ","2p3","2B1"],
-#["1Q1","1p4","   ","   ","   ","   ","2p4","2Q1"],
-#["1K1","1p5","   ","   ","   ","   ","2p5","2K1"],
-#["1B2","1p6","   ","   ","   ","   ","2p6","2B2"],
-#["1N2","1p7","   ","   ","   ","   ","2p7","2N2"],
-#["1R2","1p8","   ","   ","   ","   ","2p8","2R2"]
-#]
 
 fiftymoverule = 0
 pieces = {'R':Rook,'N':Knight,'B':Bishop,'Q':Queen,'K':King, 'p':Pawn} # A dictionary for translating piece short codes to piece classes
@@ -512,13 +489,12 @@ check = 0
 enpassant = [0,0]
 threeboard = []
 takeenpassant = 0
+turn = 1
 #MAIN LOOP
 quit = False
 setupPieces(board)
 while quit == False:
 	printBoard(board)
-	player("1")
+	player(str(turn))
 	if quit != False:
 		break
-	printBoard(board)
-	player("2")
