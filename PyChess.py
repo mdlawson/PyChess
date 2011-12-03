@@ -51,7 +51,7 @@ class Pawn(Piece):
 			return 1
 		if abs(move[0]) == 1 and abs(move[1]) != 1:
 			return 1
-		if enpassant != [0,0] and board[self.pos[0]+move[0]][self.pos[1]+move[1]] == "   " and abs(move[0]) == 1 and abs(move[1]) == 1 and abs(self.pos[0]-enpassant[0]) == 1 and abs((self.pos[1]+move[1])-enpassant[1]) == 1:
+		if enpassant != [[0,0],0] and board[self.pos[0]+move[0]][self.pos[1]+move[1]] == "   " and abs(move[0]) == 1 and abs(move[1]) == 1 and abs(self.pos[0]-enpassant[0][0]) == 1 and abs((self.pos[1]+move[1])-enpassant[0][1]) == 1 and (self.pos[0]+move[0])-enpassant[0][0] == 0 and self.color != enpassant[1]:
 			takeenpassant = self
 			return 0
 		if abs(move[1]) == 2 and board[self.pos[0]+move[0]][self.pos[1]+(abs(move[1])/move[1])] != "   ":
@@ -217,14 +217,15 @@ def decodeNotation(player,str):
 			return "More than one piece can move there"
 	if checkLegal(pieceDict[piece],posTo) == 0:
 		if piece[1] == "p" and abs(posTo[1]-pieceDict[piece].pos[1]) == 2:
-			enpassant = pieceDict[piece].pos
+			enpassant = [pieceDict[piece].pos,pieceDict[piece].color]
 		oldPos = pieceDict[piece].pos
 		movePiece(pieceDict[piece].pos,posTo)
 		pieceDict[piece].pos = posTo
 		if takeenpassant == pieceDict[piece]:
 			if player == "1":
-				oldenpassant = pieceDict[board[posTo[0]][posTo[1]-1]]
-				pieceDict[board[posTo[0]][posTo[1]-1]].status = 1
+				if board[posTo[0]][posTo[1]-1] != "   "
+					oldenpassant = pieceDict[board[posTo[0]][posTo[1]-1]]
+					pieceDict[board[posTo[0]][posTo[1]-1]].status = 1
 				board[posTo[0]][posTo[1]-1] = "   "
 			elif player == "2":
 				if board[posTo[0]][posTo[1]+1] != "   ":
@@ -323,7 +324,6 @@ def isCheckmate(color):
 						pieceDict[oldPiece].status = 0
 					board[move[0]][move[1]] = oldPiece
 					pieceDict[piece].pos = oldPos
-					print piece,move
 					return False
 				movePiece(pieceDict[piece].pos, oldPos)
 				if oldPiece != "   ":
@@ -482,7 +482,7 @@ pieceDict = {}
 colors = {1:'White',2:'Black'}
 history = []
 check = 0 
-enpassant = [0,0]
+enpassant = [[0,0],0]
 threeboard = []
 takeenpassant = 0
 turn = 1
@@ -491,4 +491,7 @@ quit = False
 setupPieces(board)
 while quit == False:
 	printBoard(board)
+	print fiftymoverule
+	if turn == enpassant[1]:
+		enpassant = [[0,0],0]
 	player(str(turn))
