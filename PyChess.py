@@ -123,16 +123,10 @@ def decodeNotation(player,str):
 		posTo = chessToCoord(str[1:])
 	elif str == "0-0":
 		err = checkCastling("kingside",player)
-		if err == 0:
-			return 0
-		else:
-			return err
+		return err
 	elif str == "0-0-0":
 		err = checkCastling("queenside",player)
-		if err == 0:
-			return 0
-		else:
-			return err
+		return err
 	elif (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
 		mtype = "coord"
 		posTo = chessToCoord(str[2:])
@@ -329,6 +323,7 @@ def isCheckmate(color):
 						pieceDict[oldPiece].status = 0
 					board[move[0]][move[1]] = oldPiece
 					pieceDict[piece].pos = oldPos
+					print piece,move
 					return False
 				movePiece(pieceDict[piece].pos, oldPos)
 				if oldPiece != "   ":
@@ -468,6 +463,7 @@ def player(num):
 		print "DRAW"
 		print "There have been fifty moves without a pawn moving or a piece being taken"
 		quit = True
+
 board = [
 ["1R1","1p1","   ","   ","   ","   ","2p1","2R1"],
 ["1N1","1p2","   ","   ","   ","   ","2p2","2N1"],
@@ -496,5 +492,3 @@ setupPieces(board)
 while quit == False:
 	printBoard(board)
 	player(str(turn))
-	if quit != False:
-		break
