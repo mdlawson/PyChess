@@ -137,8 +137,21 @@ def decodeNotation(player,str):
 		pieceType = player+str[0]
 		posTo = chessToCoord(str[2:])
 	elif (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"x") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
-		mtype = "special"
+		mtype = "specialpawn"
 		posTo = chessToCoord(str[2:])
+		x = chessToCoord(str[0]+"1")[0]
+		count = 0
+		for piece1 in pieceDict:
+			if piece1[:2] == player+"p" and pieceDict[piece1].status != 1 and pieceDict[piece1].pos[0] == x and posTo in pieceDict[piece1].moves():
+				count = count + 1
+				piece = piece1
+		if count == 0:
+			return "There aren't any pawns on "+str[0]+"-file"
+		elif count != 1:
+			return "There is more than one pawn on the "+str[0]+"-file which can take that piece. Please be more specific"
+	elif (len(str) == 3) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"12345678") == 1):
+		mtype = "specialpawn"
+		posTo = chessToCoord(str[1:])
 		x = chessToCoord(str[0]+"1")[0]
 		count = 0
 		for piece1 in pieceDict:
@@ -162,9 +175,35 @@ def decodeNotation(player,str):
 			return "There aren't any "+piecenames[str[0]]+"s on the "+str[1]+"-file"
 		elif count != 1:
 			return "There is more than one "+piecenames[str[0]]+" on the "+str[1]+"-file which can take that piece. Please be more specific"
+	elif (len(str) == 5) and (containsAny(str[0], "RBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (str[2] == "x") and (containsAny(str[3],"abcdefgh") == 1) and (containsAny(str[4],"12345678") == 1):
+		mtype = "specialtake"
+		posTo = chessToCoord(str[3:])
+		x = chessToCoord(str[1]+"1")[0]
+		count = 0
+		for piece1 in pieceDict:
+			if piece1[:2] == player+str[0] and pieceDict[piece1].status != 1 and pieceDict[piece1].pos[0] == x and posTo in pieceDict[piece1].moves():
+				count = count + 1
+				piece = piece1
+		if count == 0:
+			return "There aren't any "+piecenames[str[0]]+"s on the "+str[1]+"-file"
+		elif count != 1:
+			return "There is more than one "+piecenames[str[0]]+" on the "+str[1]+"-file which can take that piece. Please be more specific"
 	elif (len(str) == 4) and (containsAny(str[0], "RBNp") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
 		mtype = "special"
 		posTo = chessToCoord(str[2:])
+		x = chessToCoord("a"+str[1])[1]
+		count = 0
+		for piece1 in pieceDict:
+			if piece1[:2] == player+str[0] and pieceDict[piece1].status != 1 and pieceDict[piece1].pos[1] == x and posTo in pieceDict[piece1].moves():
+				count = count + 1
+				piece = piece1
+		if count == 0:
+			return "There aren't any "+piecenames[str[0]]+"s on the "+str[1]+"-rank"
+		elif count != 1:
+			return "There is more than one "+piecenames[str[0]]+" on the "+str[1]+"-rank which can take that piece. Please be more specific"
+	elif (len(str) == 5) and (containsAny(str[0], "RBNp") == 1) and (containsAny(str[1],"12345678") == 1) and (str[2] == x) and (containsAny(str[3],"abcdefgh") == 1) and (containsAny(str[4],"12345678") == 1):
+		mtype = "specialtake"
+		posTo = chessToCoord(str[3:])
 		x = chessToCoord("a"+str[1])[1]
 		count = 0
 		for piece1 in pieceDict:
@@ -200,6 +239,10 @@ def decodeNotation(player,str):
 			return "No "+piecenames[str[0]]+"s are able to take an opposition's "+piecenames[str[2]]
 		elif count != 1:
 			return "Be more specific"
+	elif (len(str) == 3) and (containsAny(str[0], "abcdefgh") == 1) and (containsAny(str[1], "12345678") == 1) and (containsAny(str[2], "QRBN") == 1):
+		mtype = "normalpromote"
+		pieceType = player+"p"
+		posTo = chessToCoord(str[:-1])
 	else:
 		return "Unknown Notation"
 
@@ -267,7 +310,10 @@ def decodeNotation(player,str):
 		if piece[1] == "p":
 			fiftymoverule = 0
 			if posTo[1] == 0 or posTo[1] == 7:
-				piece = promotePawn(posTo)
+				promoteTo = 0 
+				if mtype[-7:] == "promote":
+					promoteTo = str[2]
+				piece = promotePawn(posTo,promoteTo)
 		Coord = [pieceDict[piece].pos[0], pieceDict[piece].pos[1], posTo[0], posTo[1]]
 		history.append(Coord)
 		if board[posTo[0]][posTo[1]] != oldPiece and oldPiece != "   ":
@@ -390,15 +436,16 @@ def checkHistory(str,player):
 		b = b[1:]
 	return 0
 
-def promotePawn(pos):
+def promotePawn(pos,pieceType):
 	global pieceDict
-	input = 0
-	while input == 0:
-		pieceType = raw_input("Choose a piece: ")
-		if pieceType == "Q" or pieceType == "R" or pieceType == "B" or pieceType == "N":
-			input = 1
-		else:
-			print "Invalid piece. Type in Q, R, B or N"
+	if pieceType == 0:
+		input = 0
+		while input == 0:
+			pieceType = raw_input("Choose a piece: ")
+			if pieceType == "Q" or pieceType == "R" or pieceType == "B" or pieceType == "N":
+				input = 1
+			else:
+				print "Invalid piece. Type in Q, R, B or N"
 	del pieceDict[board[pos[0]][pos[1]]]
 	count = 1
 	for piece1 in pieceDict:
