@@ -216,6 +216,9 @@ def decodeNotation(player,str):
 		if count != 1:
 			return "More than one piece can move there"
 	if checkLegal(pieceDict[piece],posTo) == 0:
+		oldPiece = "   "
+		if board[posTo[0]][posTo[1]] != "   ":
+			oldPiece = board[posTo[0]][posTo[1]]
 		if piece[1] == "p" and abs(posTo[1]-pieceDict[piece].pos[1]) == 2:
 			enpassant = [pieceDict[piece].pos,pieceDict[piece].color]
 		oldPos = pieceDict[piece].pos
@@ -223,7 +226,7 @@ def decodeNotation(player,str):
 		pieceDict[piece].pos = posTo
 		if takeenpassant == pieceDict[piece]:
 			if player == "1":
-				if board[posTo[0]][posTo[1]-1] != "   "
+				if board[posTo[0]][posTo[1]-1] != "   ":
 					oldenpassant = pieceDict[board[posTo[0]][posTo[1]-1]]
 					pieceDict[board[posTo[0]][posTo[1]-1]].status = 1
 				board[posTo[0]][posTo[1]-1] = "   "
@@ -267,6 +270,8 @@ def decodeNotation(player,str):
 				piece = promotePawn(posTo)
 		Coord = [pieceDict[piece].pos[0], pieceDict[piece].pos[1], posTo[0], posTo[1]]
 		history.append(Coord)
+		if board[posTo[0]][posTo[1]] != oldPiece and oldPiece != "   ":
+			fiftymoverule = 0
 		if isCheck((not (int(player)-1))+1) == True:
 			if isCheckmate((not (int(player)-1))+1) == True:
 				return "That's checkmate"
@@ -405,10 +410,8 @@ def promotePawn(pos):
 	return piece
 
 def movePiece(posFrom, posTo):
-	global fiftymoverule
 	if board[posTo[0]][posTo[1]] != "   ":
 		pieceDict[board[posTo[0]][posTo[1]]].status = 1
-		fiftymoverule = 0
 	board[posTo[0]][posTo[1]] = board[posFrom[0]][posFrom[1]]
 	board[posFrom[0]][posFrom[1]] = "   "
 	return 0
@@ -491,7 +494,6 @@ quit = False
 setupPieces(board)
 while quit == False:
 	printBoard(board)
-	print fiftymoverule
 	if turn == enpassant[1]:
 		enpassant = [[0,0],0]
 	player(str(turn))
