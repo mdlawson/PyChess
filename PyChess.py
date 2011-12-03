@@ -86,9 +86,8 @@ def checkingLoop(piece, move): # generic collision detection function
 def containsAny(str, set):
 	return 1 in [c in str for c in set]
 
-def decodeNotation(player,str):
-	global fiftymoverule, check, takeenpassant, enpassant
-	inputcheck,inputcheckmate = 0,0
+def ridPunctuation(str):
+	inputcheck,inputcheckmate,take = 0,0,0
 	if str[-2:] == "?!":
 		str = str[:-2]
 		print "?!?!?!?!?!"
@@ -113,6 +112,13 @@ def decodeNotation(player,str):
 	if str[-1] == "+":
 		inputcheck = 1
 		str = str[:-1]
+	if "x" in str[1:4]:
+		str = str.translate(None, 'x')
+		take = 1
+	return str,inputcheck,inputcheckmate,take
+
+def decodeHuman(player,str):
+	str,inputcheck,inputcheckmate,take = ridPunctuation(str)
 	if (len(str) == 2) and (containsAny(str[0],"abcdefgh")) and (containsAny(str[1],"12345678")):
 		mtype = "normal"
 		pieceType = player+"p"
@@ -132,23 +138,6 @@ def decodeNotation(player,str):
 		posTo = chessToCoord(str[2:])
 		posFrom = chessToCoord(str[:2])
 		piece = board[posFrom[0]][posFrom[1]]
-	elif (len(str) == 4) and (containsAny(str[0],"KQRBNp") == 1) and (containsAny(str[1],"x") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
-		mtype = "normaltake"
-		pieceType = player+str[0]
-		posTo = chessToCoord(str[2:])
-	elif (len(str) == 4) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"x") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
-		mtype = "specialpawn"
-		posTo = chessToCoord(str[2:])
-		x = chessToCoord(str[0]+"1")[0]
-		count = 0
-		for piece1 in pieceDict:
-			if piece1[:2] == player+"p" and pieceDict[piece1].status != 1 and pieceDict[piece1].pos[0] == x and posTo in pieceDict[piece1].moves():
-				count = count + 1
-				piece = piece1
-		if count == 0:
-			return "There aren't any pawns on "+str[0]+"-file"
-		elif count != 1:
-			return "There is more than one pawn on the "+str[0]+"-file which can take that piece. Please be more specific"
 	elif (len(str) == 3) and (containsAny(str[0],"abcdefgh") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (containsAny(str[2],"12345678") == 1):
 		mtype = "specialpawn"
 		posTo = chessToCoord(str[1:])
@@ -175,35 +164,9 @@ def decodeNotation(player,str):
 			return "There aren't any "+piecenames[str[0]]+"s on the "+str[1]+"-file"
 		elif count != 1:
 			return "There is more than one "+piecenames[str[0]]+" on the "+str[1]+"-file which can take that piece. Please be more specific"
-	elif (len(str) == 5) and (containsAny(str[0], "RBNp") == 1) and (containsAny(str[1],"abcdefgh") == 1) and (str[2] == "x") and (containsAny(str[3],"abcdefgh") == 1) and (containsAny(str[4],"12345678") == 1):
-		mtype = "specialtake"
-		posTo = chessToCoord(str[3:])
-		x = chessToCoord(str[1]+"1")[0]
-		count = 0
-		for piece1 in pieceDict:
-			if piece1[:2] == player+str[0] and pieceDict[piece1].status != 1 and pieceDict[piece1].pos[0] == x and posTo in pieceDict[piece1].moves():
-				count = count + 1
-				piece = piece1
-		if count == 0:
-			return "There aren't any "+piecenames[str[0]]+"s on the "+str[1]+"-file"
-		elif count != 1:
-			return "There is more than one "+piecenames[str[0]]+" on the "+str[1]+"-file which can take that piece. Please be more specific"
 	elif (len(str) == 4) and (containsAny(str[0], "RBNp") == 1) and (containsAny(str[1],"12345678") == 1) and (containsAny(str[2],"abcdefgh") == 1) and (containsAny(str[3],"12345678") == 1):
 		mtype = "special"
 		posTo = chessToCoord(str[2:])
-		x = chessToCoord("a"+str[1])[1]
-		count = 0
-		for piece1 in pieceDict:
-			if piece1[:2] == player+str[0] and pieceDict[piece1].status != 1 and pieceDict[piece1].pos[1] == x and posTo in pieceDict[piece1].moves():
-				count = count + 1
-				piece = piece1
-		if count == 0:
-			return "There aren't any "+piecenames[str[0]]+"s on the "+str[1]+"-rank"
-		elif count != 1:
-			return "There is more than one "+piecenames[str[0]]+" on the "+str[1]+"-rank which can take that piece. Please be more specific"
-	elif (len(str) == 5) and (containsAny(str[0], "RBNp") == 1) and (containsAny(str[1],"12345678") == 1) and (str[2] == x) and (containsAny(str[3],"abcdefgh") == 1) and (containsAny(str[4],"12345678") == 1):
-		mtype = "specialtake"
-		posTo = chessToCoord(str[3:])
 		x = chessToCoord("a"+str[1])[1]
 		count = 0
 		for piece1 in pieceDict:
@@ -219,7 +182,7 @@ def decodeNotation(player,str):
 		posTo = chessToCoord(str[3:])
 		posFrom = chessToCoord(str[1:3])
 		piece = board[posFrom[0]][posFrom[1]]
-	elif (len(str) == 3) and (containsAny(str[0], "KQRBNp") == 1) and (str[1] == "x") and (containsAny(str[2], "KQRBNp") == 1):
+	elif (len(str) == 2) and (containsAny(str[0], "KQRBNp") == 1) and (containsAny(str[1], "KQRBNp") == 1) and take == 1:
 		mtype = "specialspecial"
 		listpiece1 = []
 		listpiece2 = []
@@ -246,6 +209,9 @@ def decodeNotation(player,str):
 	else:
 		return "Unknown Notation"
 
+def decodeNotation(player,str):
+	global fiftymoverule, check, takeenpassant, enpassant
+	err,mtype,piece,pieceType,posTo,inputcheck,inputcheckmate = decodeHuman(player,str)
 	if mtype[:6] == "normal":
 		if (mtype[6:] == "take") and (board[posTo[0]][posTo[1]] == "   "):
 			print "You aren't taking anything"
