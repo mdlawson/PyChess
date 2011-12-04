@@ -160,7 +160,7 @@ def decodeNotation(player,str):
 		posFrom = chessToCoord(str[-4:-2])
 		piece = board[posFrom[0]][posFrom[1]]
 		if mtype == "piececoord" and piece[1] != str[0]:
-			return "There is a "+piecenames[piece]+" at "+posFrom+" and not a "+piecenames[str[0]]
+			return "There is a "+piecenames[piece]+" at "+str[-4:-2]+" and not a "+piecenames[str[0]]
 	elif mtype[:8] == "castling":
 		err = checkCastling(mtype[8:],player)
 		return err
@@ -198,7 +198,7 @@ def decodeNotation(player,str):
 		if count != 1:
 			return "More than one piece can move there"
 	if mtype[:7] == "special":
-		posTo = chessToCoord(str[-3:])
+		posTo = chessToCoord(str[-2:])
 		if mtype[7] == "x":
 			axis = 0
 			rankorfile = "-file"
@@ -216,42 +216,25 @@ def decodeNotation(player,str):
 			return "There aren't any "+piecenames[pieceType[1]]+"s on the "+str[-3]+rankorfile
 		elif count != 1:
 			return "There is more than one "+piecenames[pieceType[1]]+" on the "+str[-3]+rankorfile+" which can move there. Be more specific"
-	if take == 1 and board[posTo[0]][posTo[1]] == "   ":
-		print "You aren't taking anything"
 
 	if checkLegal(pieceDict[piece],posTo) == 0:
-		oldPiece = "   "
-		if board[posTo[0]][posTo[1]] != "   ":
-			oldPiece = board[posTo[0]][posTo[1]]
+		oldPiece = board[posTo[0]][posTo[1]]
 		if piece[1] == "p" and abs(posTo[1]-pieceDict[piece].pos[1]) == 2:
 			enpassant = [pieceDict[piece].pos,pieceDict[piece].color]
+		if take == 1 and board[posTo[0]][posTo[1]] == "   ":
+			print "You aren't taking anything"
 		oldPos = pieceDict[piece].pos
 		movePiece(pieceDict[piece].pos,posTo)
 		pieceDict[piece].pos = posTo
 		if takeenpassant == pieceDict[piece]:
-			if player == "1":
-				if board[posTo[0]][posTo[1]-1] != "   ":
-					oldenpassant = pieceDict[board[posTo[0]][posTo[1]-1]]
-					pieceDict[board[posTo[0]][posTo[1]-1]].status = 1
-				board[posTo[0]][posTo[1]-1] = "   "
-			elif player == "2":
-				if board[posTo[0]][posTo[1]+1] != "   ":
-					oldenpassant = pieceDict[board[posTo[0]][posTo[1]+1]]
-					pieceDict[board[posTo[0]][posTo[1]+1]].status = 1
-				board[posTo[0]][posTo[1]+1] = "   "
+			takeenpassant,oldenpassant = takeEnPassant(player, posTo, 0, takeenpassant, "")
 		if int(player) == check:
 			if isCheck(int(player)) == True:
 				print "You are still in check!"
 				pieceDict[piece].pos = oldPos
 				movePiece(posTo,oldPos)
 				if takeenpassant == pieceDict[piece]:
-					if player == "1":
-						pieceDict[board[posTo[0]][posTo[1]-1]] = oldenpassant
-						pieceDict[board[posTo[0]][posTo[1]-1]].status = 0
-					elif player == "2":
-						pieceDict[board[posTo[0]][posTo[1]+1]] = oldenpassant
-						pieceDict[board[posTo[0]][posTo[1]+1]].status = 0
-					takeenpassant = 0
+					takeenpassant,oldenpassant = takeEnPassant(player, posTo, 1, takeenpassant, oldenpassant)
 				return "Move not Legal"
 			else:
 				check = 0
@@ -260,13 +243,7 @@ def decodeNotation(player,str):
 			pieceDict[piece].pos = oldPos
 			movePiece(posTo,oldPos)
 			if takeenpassant == pieceDict[piece]:
-				if player == "1":
-					pieceDict[board[posTo[0]][posTo[1]-1]] = oldenpassant
-					pieceDict[board[posTo[0]][posTo[1]-1]].status = 0
-				elif player == "2":
-					pieceDict[board[posTo[0]][posTo[1]+1]] = oldenpassant
-					pieceDict[board[posTo[0]][posTo[1]+1]].status = 0
-				takeenpassant = 0
+				takeenpassant,oldenpassant = takeEnPassant(player, posTo, 1, takeenpassant, oldenpassant)
 			return "Move not Legal"
 		if piece[1] == "p":
 			fiftymoverule = 0
@@ -413,6 +390,18 @@ def promotePawn(pos,pieceType):
 	board[pos[0]][pos[1]] =  piece
 	pieceDict[piece] = pieces[pieceType]([pos[0], pos[1]],int(board[pos[0]][pos[1]][0]))
 	return piece
+
+def takeEnPassant(player, posTo, forward, takeenpassant, oldenpassant):
+	x = -1 if player == "1" else 1
+	pieceDict[board[posTo[0]][posTo[1]+x]].status = 1-forward
+	if forward == 0:
+		print "Yo"
+		oldenpassant = pieceDict[board[posTo[0]][posTo[1]+x]]
+		board[posTo[0]][posTo[1]+x] = "   "
+	else:
+		pieceDict[board[posTo[0]][posTo[1]+x]] = oldenpassant
+	takeenpassant = 0 if forward == 1 else takeenpassant
+	return takeenpassant,oldenpassant
 
 def movePiece(posFrom, posTo):
 	if board[posTo[0]][posTo[1]] != "   ":
