@@ -88,24 +88,10 @@ def containsAny(str, set):
 
 def getridofPunctuation(str):
 	inputcheck,inputcheckmate,take = 0,0,0
-	if str[-2:] == "?!":
-		str = str[:-2]
-		print "?!?!?!?!?!"
-	if str[-2:] == "!?":
-		str = str[:-2]
-		print "!?!?!?!?!?"
-	if str[-2:] == "!!":
-		str = str[:-2]
-		print "Sheesh louise"
-	if str[-1] == "!":
-		str = str[:-1]
-		print "Alright, don't get cocky"
-	if str[-2:] == "??":
-		str = str[:-2]
-		print "Ehmmm??"
-	if str[-1] == "?":
-		str = str[:-1]
-		print "You weirdo"
+	if "?" in str:
+		str = str.translate(None, "?")
+	if "!" in str:
+		str = str.translate(None, "!")
 	if str[-2:] == "++":
 		inputcheckmate = 1
 		str = str[:-2]
