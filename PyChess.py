@@ -144,7 +144,7 @@ def decodeHuman(player,str,take):
 		return "Unknown Notation"
 	return mtype
 
-def decodeNotation(player,str):
+def run(player,str):
 	global fiftymoverule, check, takeenpassant, enpassant
 	promoteTo = 0
 	str,inputcheck,inputcheckmate,take = getridofPunctuation(str)
@@ -228,23 +228,18 @@ def decodeNotation(player,str):
 		pieceDict[piece].pos = posTo
 		if takeenpassant == pieceDict[piece]:
 			takeenpassant,oldenpassant = takeEnPassant(player, posTo, 0, takeenpassant, "")
-		if int(player) == check:
-			if isCheck(int(player)) == True:
+		ischeck = isCheck(int(player))
+		if ischeck == True:
+			if check == 1:
 				print "You are still in check!"
-				pieceDict[piece].pos = oldPos
-				movePiece(posTo,oldPos)
-				if takeenpassant == pieceDict[piece]:
-					takeenpassant,oldenpassant = takeEnPassant(player, posTo, 1, takeenpassant, oldenpassant)
-				return "Move not Legal"
 			else:
-				check = 0
-		if isCheck(int(player)) == True:
-			print "You are moving into check"
+				print "You are moving into check"
 			pieceDict[piece].pos = oldPos
 			movePiece(posTo,oldPos)
 			if takeenpassant == pieceDict[piece]:
 				takeenpassant,oldenpassant = takeEnPassant(player, posTo, 1, takeenpassant, oldenpassant)
 			return "Move not Legal"
+		check = 0
 		if piece[1] == "p":
 			fiftymoverule = 0
 			if posTo[1] == 0 or posTo[1] == 7:
@@ -256,17 +251,14 @@ def decodeNotation(player,str):
 		if isCheck((not (int(player)-1))+1) == True:
 			if isCheckmate((not (int(player)-1))+1) == True:
 				return "That's checkmate"
-			elif inputcheckmate != 0:
-				print "That wasn't checkmate"
-		else:
-			if isCheckmate((not (int(player)-1))+1) == True:
-				return "That's stalemate, BAHAHAHAHA"
-			if inputcheck == 1:
-				print "That isn't check"
-			check = 0
+		if isCheckmate((not (int(player)-1))+1) == True:
+			return "That's stalemate, BAHAHAHAHA"
+		if inputcheck == 1:
+			print "That isn't check"
+		if inputcheckmate == 1:
+			print "That isn't checkmate"
 		return 0
-	else:
-		return "Move not Legal"
+	return "Move not Legal"
 
 def chessToCoord(str):
 	coord = [0,0]
@@ -446,7 +438,7 @@ def player(num):
 		print "you are in CHECK"
 	while True:
 		naturalInput = raw_input("Your move (standard chess notation):")
-		result = decodeNotation(num,naturalInput)
+		result = run(num,naturalInput)
 		if result == 0:
 			fiftymoverule += 1
 			break
